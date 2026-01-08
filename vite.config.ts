@@ -5,11 +5,9 @@ import react from '@vitejs/plugin-react';
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, '.', '');
 
-    const repoName = process.env.GITHUB_REPOSITORY?.split('/')?.[1];
-    const inferredBase = repoName
-      ? (repoName.endsWith('.github.io') ? '/' : `/${repoName}/`)
-      : '/';
-    const base = env.VITE_BASE || inferredBase;
+    // GitHub Pages (Project Pages): https://<user>.github.io/<repo>/
+    // Keep deterministic unless explicitly overridden.
+    const base = env.VITE_BASE || '/portifolio/';
 
     return {
       base,
