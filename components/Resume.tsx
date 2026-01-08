@@ -9,7 +9,7 @@ const Resume: React.FC = () => {
   const { t } = useLanguage();
 
   return (
-    <section id="resume" className="py-24 px-6 md:px-12 lg:px-24 relative overflow-hidden">
+    <section id="resume" className="scroll-mt-28 md:scroll-mt-32 py-24 px-6 md:px-12 lg:px-24 relative overflow-hidden">
       
       {/* Background Circuit lines */}
       <svg className="absolute top-0 right-0 w-full h-full pointer-events-none opacity-[0.02] z-0" xmlns="http://www.w3.org/2000/svg">

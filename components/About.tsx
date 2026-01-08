@@ -8,7 +8,7 @@ const About: React.FC = () => {
   const { t } = useLanguage();
 
   return (
-    <section id="about" className="py-32 px-6 md:px-12 lg:px-24 bg-white/40 backdrop-blur-md border-b border-stone-200">
+    <section id="about" className="scroll-mt-28 md:scroll-mt-32 py-32 px-6 md:px-12 lg:px-24 bg-white/40 backdrop-blur-md border-b border-stone-200">
       <div className="max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

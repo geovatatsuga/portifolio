@@ -5,12 +5,14 @@ import { Settings, Share2, Activity, Droplets, TrendingUp, Minus, Plus } from 'l
 import { useLanguage } from './LanguageContext';
 import { UI_TEXT } from '../constants';
 
-type SimulationMode = 'entropy' | 'neural' | 'phase' | 'optimization';
+import type { PointerState, SimulationConfig, SimulationMode } from '../engine/types';
+import { createSimulationEngine } from '../engine/SimulationEngine';
 
 const Playground: React.FC = () => {
   const { t } = useLanguage();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+    const engineRef = useRef<ReturnType<typeof createSimulationEngine> | null>(null);
   
   // --- Config State (UI) ---
   const [mode, setMode] = useState<SimulationMode>('entropy');
@@ -21,15 +23,12 @@ const Playground: React.FC = () => {
   // Refs for animation loop
   const configRef = useRef({ mode, particleCount, gravityStrength });
   
-  // Neural Interference State
-  const interferenceRef = useRef(0); // 0 to 100
-  
   useEffect(() => {
     configRef.current = { mode, particleCount, gravityStrength };
   }, [mode, particleCount, gravityStrength]);
 
   // Interaction State
-  const mouseRef = useRef({ x: -1000, y: -1000, isDown: false, vx: 0, vy: 0, lastX: 0, lastY: 0 });
+    const mouseRef = useRef<PointerState>({ x: -1000, y: -1000, isDown: false, vx: 0, vy: 0, lastX: 0, lastY: 0 });
   const [isPressed, setIsPressed] = useState(false); 
 
   useEffect(() => {
@@ -40,310 +39,23 @@ const Playground: React.FC = () => {
     if (!ctx) return;
 
     // Initial sizing based on container
-    let width = canvas.width = container.clientWidth;
-    let height = canvas.height = container.clientHeight;
-    
-    // --- Phase State ---
-    let isLiquidPhase = false; 
+    let width = (canvas.width = container.clientWidth);
+    let height = (canvas.height = container.clientHeight);
 
-    // --- Particle System ---
-    class Particle {
-      // 2D Props
-      x: number; y: number; 
-      vx: number; vy: number;
-      originX: number; originY: number; 
-      size: number; color: string; density: number;
-      
-      // Optimization Mode Specific
-      maxSpeed: number;
-      history: {x: number, y: number}[];
-
-      constructor(currentMode: SimulationMode, index: number, total: number) {
-        // Init 2D
-        this.x = Math.random() * width;
-        this.y = Math.random() * height;
-        this.originX = this.x;
-        this.originY = this.y;
-        this.vx = 0; this.vy = 0; 
-        
-        this.size = 1; this.color = '#000'; this.density = 1;
-        this.history = [];
-        this.maxSpeed = 2;
-
-        this.resetStats(currentMode, index, total);
-      }
-
-      resetStats(currentMode: SimulationMode, index: number, total: number) {
-         this.vx = 0; this.vy = 0;
-         this.history = []; // Clear trails
-
-         if (currentMode === 'neural') {
-            this.size = Math.random() * 2 + 1.5;
-            this.color = Math.random() > 0.5 ? 'rgba(88, 28, 135, 1)' : 'rgba(18, 18, 18, 0.8)';
-            this.vx = (Math.random() - 0.5) * 0.5;
-            this.vy = (Math.random() - 0.5) * 0.5;
-         
-         } else if (currentMode === 'phase') {
-            const cols = Math.ceil(Math.sqrt(total * (width/height)));
-            const padding = width / cols;
-            const col = index % cols;
-            const row = Math.floor(index / cols);
-            
-            this.originX = (col * padding) + (padding/2) + (width - (cols*padding))/2;
-            this.originY = (row * padding) + (padding/2);
-            this.x = this.originX;
-            this.y = this.originY;
-            this.size = 2;
-            this.color = `rgba(15, 118, 110, ${Math.random() * 0.4 + 0.4})`;
-         
-         } else if (currentMode === 'optimization') {
-            this.x = Math.random() * width;
-            this.y = Math.random() * height;
-            this.size = Math.random() * 1.5 + 0.5;
-            this.maxSpeed = Math.random() * 2 + 2; 
-            this.color = `rgba(20, 20, 20, ${Math.random() * 0.5 + 0.2})`;
-         
-         } else {
-            // Entropy
-            this.size = Math.random() * 1.5 + 0.5;
-            this.vx = (Math.random() - 0.5) * 2;
-            this.vy = (Math.random() - 0.5) * 2;
-            const shade = Math.floor(Math.random() * 100);
-            this.color = `rgba(${shade}, ${shade}, ${shade}, ${Math.random() * 0.5 + 0.2})`;
-         }
-         this.density = (Math.random() * 30) + 1;
-      }
-    }
-
-    let particles: Particle[] = [];
-    
-    // --- Helper: Perlin-ish Noise Function for Flow Field ---
-    const getFlowFieldAngle = (x: number, y: number, time: number) => {
-        const scale = 0.003;
-        const val = Math.sin(x * scale) + Math.cos(y * scale) 
-                  + Math.sin((x + y) * scale * 0.5 + time) 
-                  + Math.cos((x - y) * scale * 0.5);
-        return val * Math.PI; 
-    }
+    engineRef.current = createSimulationEngine({ width, height });
 
     // --- Animation Loop ---
     let animationFrameId: number;
-    let lastMode = configRef.current.mode;
-    let time = 0;
 
     const animate = () => {
-        const { mode: currentMode, particleCount: currentCount, gravityStrength: currentGravity } = configRef.current;
-        const { x: mx, y: my, isDown, vx: mvx, vy: mvy } = mouseRef.current;
-        const mouseSpeed = Math.sqrt(mvx*mvx + mvy*mvy);
-        
-        time += 0.01; 
-
-        // --- GLOBAL LOGIC ---
-        // Neural Interference Logic
-        if (currentMode === 'neural') {
-            if (isDown) {
-                interferenceRef.current = Math.min(interferenceRef.current + 1, 50); 
-            } else {
-                interferenceRef.current = Math.max(interferenceRef.current - 2, 0); 
-            }
-        } else {
-            interferenceRef.current = 0;
-        }
-
-        // Manage Particle Count & Mode Switch
-        let targetCount = currentCount;
-        if (currentMode === 'neural') targetCount = Math.min(currentCount, 120); 
-        if (currentMode === 'optimization') targetCount = Math.min(currentCount, 2000); 
-
-        if (currentMode !== lastMode) {
-             particles = [];
-             for(let i=0; i<targetCount; i++) particles.push(new Particle(currentMode, i, targetCount));
-             lastMode = currentMode;
-             isLiquidPhase = false; 
-             interferenceRef.current = 0;
-        }
-
-        if (particles.length < targetCount) {
-             const toAdd = Math.min(50, targetCount - particles.length); 
-             for(let i=0; i<toAdd; i++) particles.push(new Particle(currentMode, particles.length+i, targetCount));
-        } else if (particles.length > targetCount) {
-             particles.length = targetCount;
-        }
-
-        // --- CANVAS CLEARING ---
-        if (currentMode === 'neural') {
-             ctx.clearRect(0, 0, width, height);
-        } else if (currentMode === 'optimization') {
-             ctx.fillStyle = 'rgba(253, 252, 248, 0.08)'; 
-             ctx.fillRect(0, 0, width, height);
-        } else {
-             ctx.fillStyle = 'rgba(253, 252, 248, 0.4)';
-             ctx.fillRect(0, 0, width, height);
-        }
-
-        // --- UPDATE LOOP ---
-        
-        // 1. NEURAL CONNECTIONS
-        if (currentMode === 'neural') {
-            const interference = interferenceRef.current;
-            ctx.lineWidth = 0.5;
-            for (let i = 0; i < particles.length; i++) {
-                const p = particles[i];
-                for (let j = i + 1; j < particles.length; j++) {
-                    const p2 = particles[j];
-                    const dx = p.x - p2.x;
-                    const dy = p.y - p2.y;
-                    const distSq = dx*dx + dy*dy;
-                    if (distSq < 15000) { 
-                        const dist = Math.sqrt(distSq);
-                        const opacity = 1 - (distSq/15000);
-                        const isGlitch = interference > 20 && Math.random() > 0.8;
-                        ctx.strokeStyle = isGlitch ? `rgba(220, 38, 38, ${opacity})` : `rgba(88, 28, 135, ${opacity * (interference > 0 ? 0.8 : 0.2)})`;
-                        ctx.beginPath();
-                        ctx.moveTo(p.x, p.y);
-                        ctx.lineTo(p2.x, p2.y);
-                        ctx.stroke();
-                        if (interference > 5 && Math.random() > 0.95) {
-                            const midX = (p.x + p2.x) / 2;
-                            const midY = (p.y + p2.y) / 2;
-                            ctx.font = '10px monospace';
-                            ctx.fillStyle = isGlitch ? 'red' : 'black';
-                            const bin = Math.random().toString(2).substring(2, 6); 
-                            ctx.fillText(bin, midX, midY);
-                        }
-                    }
-                }
-            }
-        }
-
-        // 2. PARTICLE PHYSICS
-        for (let i = 0; i < particles.length; i++) {
-             const p = particles[i];
-             const dx = mx - p.x;
-             const dy = my - p.y;
-             const dist = Math.sqrt(dx*dx + dy*dy);
-
-             // ==========================
-             // MODE: OPTIMIZATION
-             // ==========================
-             if (currentMode === 'optimization') {
-                const fieldAngle = getFlowFieldAngle(p.x, p.y, time);
-                const mouseAngle = Math.atan2(dy, dx);
-                const mouseInfluence = isDown ? 0.95 : 0.05; 
-                
-                const fieldVx = Math.cos(fieldAngle);
-                const fieldVy = Math.sin(fieldAngle);
-                const mouseVx = Math.cos(mouseAngle);
-                const mouseVy = Math.sin(mouseAngle);
-
-                let targetVx = (fieldVx * (1 - mouseInfluence)) + (mouseVx * mouseInfluence);
-                let targetVy = (fieldVy * (1 - mouseInfluence)) + (mouseVy * mouseInfluence);
-
-                p.vx += targetVx * 0.2;
-                p.vy += targetVy * 0.2;
-                
-                const speed = Math.sqrt(p.vx*p.vx + p.vy*p.vy);
-                const limit = isDown ? p.maxSpeed * 3 : p.maxSpeed;
-                if (speed > limit) {
-                    p.vx = (p.vx / speed) * limit;
-                    p.vy = (p.vy / speed) * limit;
-                }
-
-                p.x += p.vx;
-                p.y += p.vy;
-
-                const distToMouse = Math.sqrt(Math.pow(mx - p.x, 2) + Math.pow(my - p.y, 2));
-                if ((distToMouse < 5 && isDown) || p.x < 0 || p.x > width || p.y < 0 || p.y > height) {
-                    p.x = Math.random() * width;
-                    p.y = Math.random() * height;
-                    p.vx = 0; p.vy = 0;
-                }
-                
-                ctx.fillStyle = isDown ? 'rgba(220, 38, 38, 0.5)' : 'rgba(0,0,0,0.4)';
-                ctx.fillRect(p.x, p.y, isDown ? 2 : 1.5, isDown ? 2 : 1.5);
-             }
-             
-             // ==========================
-             // MODE: NEURAL
-             // ==========================
-             else if (currentMode === 'neural') {
-                 p.x += p.vx;
-                 p.y += p.vy;
-                 if (interferenceRef.current > 0) {
-                     const intensity = interferenceRef.current; 
-                     p.x += (Math.random() - 0.5) * intensity * 0.5;
-                     p.y += (Math.random() - 0.5) * intensity * 0.5;
-                     if (intensity > 30) {
-                         const angle = Math.atan2(dy, dx);
-                         p.vx += Math.cos(angle) * 0.5;
-                         p.vy += Math.sin(angle) * 0.5;
-                     }
-                 }
-                 if (p.x < 0 || p.x > width) p.vx *= -1;
-                 if (p.y < 0 || p.y > height) p.vy *= -1;
-                 ctx.beginPath();
-                 const radius = p.size + (interferenceRef.current > 0 ? Math.random() * 2 : 0);
-                 ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
-                 ctx.fillStyle = p.color;
-                 ctx.fill();
-             }
-
-             // ==========================
-             // MODE: PHASE
-             // ==========================
-             else if (currentMode === 'phase') {
-                 const heatRadius = isLiquidPhase ? 150 : 250;
-                 if (dist < heatRadius) {
-                     const force = (heatRadius - dist) / heatRadius;
-                     const shake = isLiquidPhase ? 0 : Math.random() * mouseSpeed * 0.1; 
-                     const pushStrength = isLiquidPhase ? 2 : (mouseSpeed > 10 ? 10 : 0.5);
-                     p.vx -= (dx/dist) * force * pushStrength + (Math.random()-0.5)*shake;
-                     p.vy -= (dy/dist) * force * pushStrength + (Math.random()-0.5)*shake;
-                 }
-                 if (!isLiquidPhase) { 
-                     const k = 0.08 * (1 + currentGravity);
-                     p.vx += (p.originX - p.x) * k;
-                     p.vy += (p.originY - p.y) * k;
-                     p.vx *= 0.85; p.vy *= 0.85;
-                 } else { 
-                     p.vx += (Math.random() - 0.5) * 0.1;
-                     p.vy += (Math.random() - 0.5) * 0.1;
-                     p.vx *= 0.96; p.vy *= 0.96;
-                 }
-                 p.x += p.vx; p.y += p.vy;
-                 ctx.fillStyle = p.color;
-                 if (!isLiquidPhase) {
-                     const speed = Math.sqrt(p.vx*p.vx + p.vy*p.vy);
-                     const stretch = Math.min(speed, 5);
-                     ctx.fillRect(p.x, p.y, p.size + stretch, p.size - (stretch/2));
-                 } else {
-                     ctx.beginPath();
-                     ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                     ctx.fill();
-                 }
-             }
-
-             // ==========================
-             // MODE: ENTROPY
-             // ==========================
-             else {
-                const forceDist = Math.max(dist, 50);
-                const maxG = isDown ? 5000 : 200 + (currentGravity * 1000); 
-                const force = (maxG - dist) / forceDist;
-                if (isDown || dist < 300) {
-                     const pull = isDown ? 2 : 0.5;
-                     p.vx += (dx/dist) * force * p.density * 0.003 * pull;
-                     p.vy += (dy/dist) * force * p.density * 0.003 * pull;
-                }
-                p.vx *= 0.95; p.vy *= 0.95;
-                p.x += p.vx; p.y += p.vy;
-                if (p.x < 0) p.x = width; else if (p.x > width) p.x = 0;
-                if (p.y < 0) p.y = height; else if (p.y > height) p.y = 0;
-                ctx.fillStyle = p.color;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                ctx.fill();
-             }
+        const engine = engineRef.current;
+        if (engine) {
+          const config: SimulationConfig = {
+            mode: configRef.current.mode,
+            particleCount: configRef.current.particleCount,
+            gravityStrength: configRef.current.gravityStrength,
+          };
+          engine.step(ctx, config, mouseRef.current);
         }
 
         animationFrameId = requestAnimationFrame(animate);
@@ -355,6 +67,7 @@ const Playground: React.FC = () => {
         if (containerRef.current && canvasRef.current) {
             width = canvasRef.current.width = containerRef.current.clientWidth;
             height = canvasRef.current.height = containerRef.current.clientHeight;
+            engineRef.current?.resize({ width, height });
         }
     }
     const handleMove = (x: number, y: number) => {
@@ -377,24 +90,16 @@ const Playground: React.FC = () => {
     const handleUp = () => { 
         mouseRef.current.isDown = false; 
         setIsPressed(false); 
-        
-        // Mode Specific Click Triggers
-        if (configRef.current.mode === 'entropy') {
-             const mx = mouseRef.current.x;
-             const my = mouseRef.current.y;
-             particles.forEach(p => {
-                 const dx = p.x - mx;
-                 const dy = p.y - my;
-                 const dist = Math.sqrt(dx*dx + dy*dy);
-                 if (dist < 300) {
-                     p.vx = (dx/dist) * (Math.random() * 30 + 10);
-                     p.vy = (dy/dist) * (Math.random() * 30 + 10);
-                 }
-             });
-        } 
-        else if (configRef.current.mode === 'phase') {
-             isLiquidPhase = !isLiquidPhase;
-        }
+
+                const engine = engineRef.current;
+                if (engine) {
+                    const config: SimulationConfig = {
+                        mode: configRef.current.mode,
+                        particleCount: configRef.current.particleCount,
+                        gravityStrength: configRef.current.gravityStrength,
+                    };
+                    engine.onPointerUp(config, mouseRef.current);
+                }
     }
 
     // Attach Listeners
@@ -425,7 +130,7 @@ const Playground: React.FC = () => {
   }, []);
 
   return (
-    <section id="lab" className="w-full bg-ivory border-b border-stone-200">
+        <section id="lab" className="scroll-mt-28 md:scroll-mt-32 w-full bg-ivory border-b border-stone-200">
        
        {/* --- SECTION HEADER (Static, outside canvas) --- */}
        <div className="pt-24 pb-8 px-6 md:px-12 lg:px-24 max-w-7xl mx-auto pointer-events-none">

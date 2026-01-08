@@ -105,7 +105,7 @@ const Skills: React.FC = () => {
   }
 
   return (
-    <section id="skills" className="py-32 px-6 md:px-12 lg:px-24 bg-stone-50 relative overflow-hidden">
+    <section id="skills" className="scroll-mt-28 md:scroll-mt-32 py-32 px-6 md:px-12 lg:px-24 bg-stone-50 relative overflow-hidden">
       
       {/* Abstract Data Flow Lines Background */}
       <svg className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-[0.03]" xmlns="http://www.w3.org/2000/svg">

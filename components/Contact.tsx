@@ -8,7 +8,7 @@ const Contact: React.FC = () => {
   const { t } = useLanguage();
 
   return (
-    <section id="contact" className="py-32 px-6 md:px-12 lg:px-24 bg-obsidian text-ivory relative overflow-hidden">
+    <section id="contact" className="scroll-mt-28 md:scroll-mt-32 py-32 px-6 md:px-12 lg:px-24 bg-obsidian text-ivory relative overflow-hidden">
         
         {/* Event Horizon Animation */}
         <div className="absolute bottom-[-20%] left-1/2 -translate-x-1/2 w-[1000px] h-[400px] pointer-events-none">

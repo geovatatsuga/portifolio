@@ -108,7 +108,7 @@ const Projects: React.FC = () => {
   };
 
   return (
-    <section id="projects" className="py-32 px-6 md:px-12 lg:px-24 relative overflow-hidden bg-stone-50/30">
+        <section id="projects" className="scroll-mt-28 md:scroll-mt-32 py-32 px-6 md:px-12 lg:px-24 relative overflow-hidden bg-stone-50/30">
        
        {/* Background: Digital Grid */}
        <div className="absolute inset-0 opacity-[0.05] pointer-events-none">

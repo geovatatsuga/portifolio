@@ -27,8 +27,8 @@ export const PROFILE = {
     email: "jeova.herminio@gmail.com",
     phone: "+55 83 98803-8348",
     social: [
-      { name: "LinkedIn", url: "https://linkedin.com", icon: Linkedin },
-      { name: "GitHub", url: "https://github.com", icon: Github },
+      { name: "LinkedIn", url: "https://www.linkedin.com/in/jeova-anderson/", icon: Linkedin },
+      { name: "GitHub", url: "https://github.com/geovatatsuga", icon: Github },
       { name: "Medium", url: "https://medium.com/@jeova.anderson", icon: FileText },
     ]
   }
