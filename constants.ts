@@ -17,11 +17,8 @@ export const PROFILE = {
     I believe that success in Data Science and Artificial Intelligence comes from the combination of collaboration, practice, and continuous learning.
     
     With feet on the ground and eyes looking forward, I seek to grow and, at the same time, open doors for those who, like me, believe that technology is also a tool for inclusion, transformation, and the future.`,
-    pt: `Movido pela curiosidade, pela tecnologia e pelo desejo de resolver problemas reais, estou sempre em busca de evolução constante. 
-    Encontro verdadeira satisfação em transformar dados em soluções que fazem a diferença — seja para empresas, comunidades ou indivíduos. 
-    Acredito que o sucesso na Ciência de Dados e na Inteligência Artificial vem da combinação de colaboração, prática e aprendizado contínuo.
-    
-    Com os pés no chão e os olhos voltados para frente, busco crescer e, ao mesmo tempo, abrir portas para aqueles que, como eu, acreditam que a tecnologia também é uma ferramenta de inclusão, transformação e futuro.`
+    pt: `Movido pela curiosidade, pela tecnologia e pelo desejo de resolver problemas reais, estou sempre em busca de evolução constante.
+    Acredito que o sucesso na Ciência de Dados e na Inteligência Artificial vem da combinação de colaboração, prática e aprendizado contínuo.`
   },
   contact: {
     email: "jeova.herminio@gmail.com",
