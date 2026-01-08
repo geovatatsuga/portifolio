@@ -22,10 +22,15 @@ const Resume: React.FC = () => {
           <h3 className="font-sans text-xs font-bold uppercase tracking-widest text-stone-400">
             {t(UI_TEXT.resume.title)}
           </h3>
-          <button className="flex items-center gap-2 text-xs font-sans uppercase tracking-widest text-obsidian hover:text-purple-900 transition-colors border border-stone-200 px-4 py-2 rounded-full hover:bg-stone-50">
+          <a
+            href="https://uploadnow.io/f/pgpfpn9"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 text-xs font-sans uppercase tracking-widest text-obsidian hover:text-purple-900 transition-colors border border-stone-200 px-4 py-2 rounded-full hover:bg-stone-50"
+          >
             <Download className="w-4 h-4" />
             {t(UI_TEXT.resume.download)}
-          </button>
+          </a>
         </div>
 
         <div className="grid md:grid-cols-[1fr_3fr] gap-12">
