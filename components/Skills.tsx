@@ -36,7 +36,7 @@ const Skills: React.FC = () => {
                animate={{ opacity: [0.5, 1, 0.5] }}
                transition={{ duration: 3, repeat: Infinity }}
              >
-                {`{ }`}
+                `{ }`
              </motion.div>
           </div>
         );
@@ -53,6 +53,27 @@ const Skills: React.FC = () => {
                   transition={{ 
                     duration: 2, 
                     delay: i * 0.2, 
+                    repeat: Infinity, 
+                    repeatType: "reverse",
+                    ease: "easeInOut" 
+                  }}
+                />
+             ))}
+          </div>
+        );
+    }
+    if (category.includes('Business Intelligence') || category.includes('Business Intelligence')) {
+        return (
+          <div className="absolute right-4 bottom-4 w-24 h-16 opacity-10 pointer-events-none flex items-end justify-end gap-1">
+             {[40, 70, 50, 90, 60].map((h, i) => (
+                <motion.div
+                  key={i}
+                  className="w-3 bg-purple-900"
+                  initial={{ height: "10%" }}
+                  animate={{ height: `${h}%` }}
+                  transition={{ 
+                    duration: 2.5, 
+                    delay: i * 0.15, 
                     repeat: Infinity, 
                     repeatType: "reverse",
                     ease: "easeInOut" 
@@ -111,7 +132,7 @@ const Skills: React.FC = () => {
                     <circle cx="50" cy="50" r="40" strokeDasharray="8 4" />
                     <path d="M50 10 L50 20 M50 80 L50 90 M10 50 L20 50 M80 50 L90 50" strokeWidth="2" />
                     <path d="M22 22 L28 28 M72 72 L78 78 M22 78 L28 72 M72 28 L78 22" strokeWidth="2" />
-                    
+                   
                     {/* Inner Hexagon */}
                     <path d="M50 35 L63 42.5 L63 57.5 L50 65 L37 57.5 L37 42.5 Z" strokeWidth="1" />
                     <circle cx="50" cy="50" r="5" fill="currentColor" />

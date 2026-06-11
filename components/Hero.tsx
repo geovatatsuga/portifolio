@@ -9,8 +9,26 @@ import { useLanguage } from './LanguageContext';
 // --- Sub-component: Neural Network Canvas ---
 const NeuralNetworkCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [isIntersecting, setIsIntersecting] = useState(true);
 
   useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsIntersecting(entry.isIntersecting);
+      },
+      { rootMargin: '100px' }
+    );
+
+    observer.observe(canvas);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!isIntersecting) return;
+
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -30,35 +48,27 @@ const NeuralNetworkCanvas: React.FC = () => {
     }
 
     const particles: Particle[] = [];
-    // Increased count slightly to compensate for fading particles
     const particleCount = width < 768 ? 40 : 80; 
     const connectionDistance = 160;
     const mouseDistance = 250;
     
     let mouse = { x: -1000, y: -1000, lastMove: Date.now() };
 
-    // Initialize Particle Helper
     const initParticle = (p?: Particle): Particle => {
-      const isRespawn = !!p;
       const newP = p || {} as Particle;
-      
       newP.x = Math.random() * width;
       newP.y = Math.random() * height;
-      
       newP.vx = (Math.random() - 0.5) * 1.5;
       newP.vy = (Math.random() - 0.5) * 1.5;
       newP.binary = Math.random() > 0.5 ? '1' : '0';
       newP.life = 0;
-      // Random lifespan between 200 and 500 frames (~3 to 8 seconds)
       newP.maxLife = 200 + Math.random() * 300; 
 
       return newP;
     };
 
-    // Create initial batch
     for (let i = 0; i < particleCount; i++) {
       particles.push(initParticle());
-      // Randomize initial life so they don't all die at once
       particles[i].life = Math.random() * particles[i].maxLife;
     }
 
@@ -77,77 +87,62 @@ const NeuralNetworkCanvas: React.FC = () => {
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseleave', handleMouseLeave);
     
-    window.addEventListener('resize', () => {
+    const handleResize = () => {
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
-    });
+    };
+    window.addEventListener('resize', handleResize);
 
+    let animationFrameId: number;
     const animate = () => {
       ctx.clearRect(0, 0, width, height);
       
       const now = Date.now();
-      const isMouseActive = now - mouse.lastMove < 2000; // Mouse considered active if moved in last 2s
+      const isMouseActive = now - mouse.lastMove < 2000;
 
-      // Update & Draw Particles
       particles.forEach((p, i) => {
-        // 1. Lifecycle Management
         p.life++;
         if (p.life >= p.maxLife) {
-            initParticle(p); // Respawn
+            initParticle(p);
         }
 
-        // Calculate Opacity based on life (Sine wave for smooth fade in/out)
-        // 0 -> 1 -> 0
         const opacity = Math.sin((p.life / p.maxLife) * Math.PI); 
-
-        // 2. Movement Logic
-        // If mouse is inactive, disperse faster (higher random jitter)
         const jitter = isMouseActive ? 0.05 : 0.15;
         
         p.vx += (Math.random() - 0.5) * jitter;
         p.vy += (Math.random() - 0.5) * jitter;
 
-        // Friction
         p.vx *= 0.99; 
         p.vy *= 0.99;
 
-        // Apply
         p.x += p.vx;
         p.y += p.vy;
 
-        // Wrap around screen instead of bounce (better for "cloud" feel)
         if (p.x < -50) p.x = width + 50;
         if (p.x > width + 50) p.x = -50;
         if (p.y < -50) p.y = height + 50;
         if (p.y > height + 50) p.y = -50;
 
-        // Calculate distance to mouse
         const dxMouse = p.x - mouse.x;
         const dyMouse = p.y - mouse.y;
         const distToMouse = Math.sqrt(dxMouse * dxMouse + dyMouse * dyMouse);
         
-        // --- DRAW LOGIC ---
         ctx.beginPath();
 
-        // INTERFERENCE LOGIC: 
         if (distToMouse < mouseDistance) {
             if (Math.random() > 0.9) p.binary = Math.random() > 0.5 ? '1' : '0';
 
             ctx.font = '12px "Courier New", monospace';
-            // Opacity affected by both distance AND lifecycle
             ctx.fillStyle = `rgba(88, 28, 135, ${opacity * 0.8 * (1 - distToMouse / mouseDistance)})`; 
             
             const glitchOffset = distToMouse < 100 ? (Math.random() - 0.5) * 3 : 0;
             ctx.fillText(p.binary, p.x + glitchOffset, p.y + glitchOffset);
         } else {
-            // NORMAL DOT
             ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(168, 162, 158, ${opacity * 0.3})`; // Base opacity 0.3
+            ctx.fillStyle = `rgba(168, 162, 158, ${opacity * 0.3})`;
             ctx.fill();
         }
 
-        // Connect to other particles
-        // Optimization: Only connect if particle has decent opacity
         if (opacity > 0.1) {
             for (let j = i + 1; j < particles.length; j++) {
               const p2 = particles[j];
@@ -157,7 +152,6 @@ const NeuralNetworkCanvas: React.FC = () => {
     
               if (dist < connectionDistance) {
                 ctx.beginPath();
-                // Combine opacities of both particles for line strength
                 const lineOpacity = Math.min(opacity, Math.sin((p2.life / p2.maxLife) * Math.PI));
                 
                 ctx.strokeStyle = `rgba(168, 162, 158, ${lineOpacity * 0.15 * (1 - dist / connectionDistance)})`;
@@ -169,7 +163,6 @@ const NeuralNetworkCanvas: React.FC = () => {
             }
         }
 
-        // Connect to mouse
         if (distToMouse < mouseDistance) {
             ctx.beginPath();
             ctx.strokeStyle = `rgba(107, 33, 168, ${opacity * 0.2 * (1 - distToMouse / mouseDistance)})`; 
@@ -186,7 +179,6 @@ const NeuralNetworkCanvas: React.FC = () => {
             ctx.stroke();
             ctx.setLineDash([]);
             
-            // Attraction
             if (distToMouse > 50) {
                p.x -= dxMouse * 0.02;
                p.y -= dyMouse * 0.02;
@@ -194,7 +186,7 @@ const NeuralNetworkCanvas: React.FC = () => {
         }
       });
 
-      requestAnimationFrame(animate);
+      animationFrameId = requestAnimationFrame(animate);
     };
 
     animate();
@@ -202,9 +194,10 @@ const NeuralNetworkCanvas: React.FC = () => {
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseleave', handleMouseLeave);
+      window.removeEventListener('resize', handleResize);
+      cancelAnimationFrame(animationFrameId);
     };
-  }, []);
-
+  }, [isIntersecting]);
   return <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none z-0" />;
 };
 
@@ -327,7 +320,7 @@ const Hero: React.FC = () => {
             transition={{ delay: 0.5, duration: 1 }}
             className="font-mono text-xs text-stone-500 uppercase tracking-widest flex items-center gap-2"
           >
-            Portfolio 2025 <span className="w-1 h-1 bg-green-500 rounded-full animate-pulse"/> {t(UI_TEXT.hero.active)}
+            Portfolio 2026 <span className="w-1 h-1 bg-green-500 rounded-full animate-pulse"/> {t(UI_TEXT.hero.active)}
           </motion.span>
         </motion.div>
 

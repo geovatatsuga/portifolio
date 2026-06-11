@@ -23,7 +23,7 @@ const Resume: React.FC = () => {
             {t(UI_TEXT.resume.title)}
           </h3>
           <a
-            href="/CurriculoJeovaAtualizado.pdf"
+            href={`${import.meta.env.BASE_URL}CurriculoJeovaAtualizado.pdf`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 text-xs font-sans uppercase tracking-widest text-obsidian hover:text-purple-900 transition-colors border border-stone-200 px-4 py-2 rounded-full hover:bg-stone-50"

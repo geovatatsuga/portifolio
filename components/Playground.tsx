@@ -28,10 +28,29 @@ const Playground: React.FC = () => {
   }, [mode, particleCount, gravityStrength]);
 
   // Interaction State
-    const mouseRef = useRef<PointerState>({ x: -1000, y: -1000, isDown: false, vx: 0, vy: 0, lastX: 0, lastY: 0 });
+  const mouseRef = useRef<PointerState>({ x: -1000, y: -1000, isDown: false, vx: 0, vy: 0, lastX: 0, lastY: 0 });
   const [isPressed, setIsPressed] = useState(false); 
+  const [isIntersecting, setIsIntersecting] = useState(false);
+
+  // Observer to only run engine when on screen
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsIntersecting(entry.isIntersecting);
+      },
+      { rootMargin: '100px' }
+    );
+
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
+    if (!isIntersecting) return;
+
     const canvas = canvasRef.current;
     const container = containerRef.current;
     if (!canvas || !container) return;
@@ -42,7 +61,11 @@ const Playground: React.FC = () => {
     let width = (canvas.width = container.clientWidth);
     let height = (canvas.height = container.clientHeight);
 
-    engineRef.current = createSimulationEngine({ width, height });
+    if (!engineRef.current) {
+        engineRef.current = createSimulationEngine({ width, height });
+    } else {
+        engineRef.current.resize({ width, height });
+    }
 
     // --- Animation Loop ---
     let animationFrameId: number;
@@ -91,15 +114,15 @@ const Playground: React.FC = () => {
         mouseRef.current.isDown = false; 
         setIsPressed(false); 
 
-                const engine = engineRef.current;
-                if (engine) {
-                    const config: SimulationConfig = {
-                        mode: configRef.current.mode,
-                        particleCount: configRef.current.particleCount,
-                        gravityStrength: configRef.current.gravityStrength,
-                    };
-                    engine.onPointerUp(config, mouseRef.current);
-                }
+        const engine = engineRef.current;
+        if (engine) {
+            const config: SimulationConfig = {
+                mode: configRef.current.mode,
+                particleCount: configRef.current.particleCount,
+                gravityStrength: configRef.current.gravityStrength,
+            };
+            engine.onPointerUp(config, mouseRef.current);
+        }
     }
 
     // Attach Listeners
@@ -127,7 +150,7 @@ const Playground: React.FC = () => {
         cancelAnimationFrame(animationFrameId);
     };
 
-  }, []);
+  }, [isIntersecting]);
 
   return (
         <section id="lab" className="scroll-mt-28 md:scroll-mt-32 w-full bg-ivory border-b border-stone-200">

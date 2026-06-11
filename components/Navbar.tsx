@@ -3,7 +3,29 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from './LanguageContext';
 import { UI_TEXT } from '../constants';
-import { Globe } from 'lucide-react';
+
+const USFlag: React.FC = () => (
+  <svg className="w-4 h-3 rounded-[2px] shadow-xs inline-block" viewBox="0 0 18 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="18" height="12" fill="#3C3B6E" />
+    <path d="M0 1H18M0 3H18M0 5H18M0 7H18M0 9H18M0 11H18" stroke="#B22234" strokeWidth="1" />
+    <path d="M0 0.5H18M0 2.5H18M0 4.5H18M0 6.5H18M0 8.5H18M0 10.5H18M0 12.5H18" stroke="#FFFFFF" strokeWidth="1" />
+    <rect width="8" height="6" fill="#3C3B6E" />
+    <circle cx="2" cy="1.5" r="0.4" fill="white" />
+    <circle cx="6" cy="1.5" r="0.4" fill="white" />
+    <circle cx="4" cy="3" r="0.4" fill="white" />
+    <circle cx="2" cy="4.5" r="0.4" fill="white" />
+    <circle cx="6" cy="4.5" r="0.4" fill="white" />
+  </svg>
+);
+
+const BRFlag: React.FC = () => (
+  <svg className="w-4 h-3 rounded-[2px] shadow-xs inline-block" viewBox="0 0 18 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="18" height="12" fill="#009739" />
+    <polygon points="9,1.5 16.5,6 9,10.5 1.5,6" fill="#FEDF00" />
+    <circle cx="9" cy="6" r="2.5" fill="#2D3866" />
+    <path d="M7 6.3C8 6.3 9.2 5.9 10.8 5.1" stroke="white" strokeWidth="0.4" fill="none" />
+  </svg>
+);
 
 const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -58,12 +80,17 @@ const Navbar: React.FC = () => {
         {/* Language Switcher */}
         <button 
           onClick={() => setLanguage(language === 'en' ? 'pt' : 'en')}
-          className="flex items-center gap-2 font-mono text-xs font-bold text-obsidian hover:text-purple-900 transition-colors"
+          className="flex items-center gap-2 font-mono text-[10px] md:text-xs font-bold text-obsidian hover:text-purple-900 transition-colors"
         >
-            <Globe className="w-3 h-3 text-stone-400" />
-            <span className={language === 'en' ? 'text-obsidian' : 'text-stone-400'}>EN</span>
-            <span className="text-stone-300">/</span>
-            <span className={language === 'pt' ? 'text-obsidian' : 'text-stone-400'}>PT</span>
+            <div className="flex items-center gap-2">
+              <span className={`flex items-center gap-1 ${language === 'en' ? 'text-obsidian' : 'text-stone-400'}`}>
+                <USFlag /> EN
+              </span>
+              <span className="text-stone-300">/</span>
+              <span className={`flex items-center gap-1 ${language === 'pt' ? 'text-obsidian' : 'text-stone-400'}`}>
+                <BRFlag /> PT
+              </span>
+            </div>
         </button>
 
       </div>

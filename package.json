@@ -1,11 +1,11 @@
 {
-  "name": "jeová-anderson---portfolio",
+  "name": "portifolio-frontend",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && vite build --ssr entry-server.tsx --outDir dist/server && node scripts/prerender.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

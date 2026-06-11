@@ -1,18 +1,14 @@
-
-import React, { useState, useRef } from 'react';
-import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
-import { PROJECTS, UI_TEXT } from '../constants';
+import React, { useRef } from 'react';
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { PROJECTS, UI_TEXT, GENAI_PROJECTS } from '../constants';
 import { useLanguage } from './LanguageContext';
 import { 
   ArrowUpRight, 
   Cpu, 
   Activity, 
   Database, 
-  GitBranch, 
-  ScanEye, 
-  BarChart3, 
-  Trophy, 
-  Folder 
+  GitBranch,
+  Brain
 } from 'lucide-react';
 
 // --- Sub-component: 3D Holographic Card ---
@@ -26,8 +22,17 @@ const TiltCard = ({ children, index }: { children: React.ReactNode, index: numbe
     const rotateX = useTransform(mouseY, [-0.5, 0.5], ["10deg", "-10deg"]);
     const rotateY = useTransform(mouseX, [-0.5, 0.5], ["-10deg", "10deg"]);
 
+    const rectRef = useRef<DOMRect | null>(null);
+
+    const handleMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => {
+        rectRef.current = e.currentTarget.getBoundingClientRect();
+    };
+
     const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-        const rect = e.currentTarget.getBoundingClientRect();
+        if (!rectRef.current) {
+            rectRef.current = e.currentTarget.getBoundingClientRect();
+        }
+        const rect = rectRef.current;
         const width = rect.width;
         const height = rect.height;
         const mouseXVal = e.clientX - rect.left;
@@ -39,6 +44,7 @@ const TiltCard = ({ children, index }: { children: React.ReactNode, index: numbe
     };
 
     const handleMouseLeave = () => {
+        rectRef.current = null;
         x.set(0);
         y.set(0);
     };
@@ -52,12 +58,14 @@ const TiltCard = ({ children, index }: { children: React.ReactNode, index: numbe
             className="h-full"
         >
             <motion.div
+                onMouseEnter={handleMouseEnter}
                 onMouseMove={handleMouseMove}
                 onMouseLeave={handleMouseLeave}
                 style={{
                     rotateX,
                     rotateY,
                     transformStyle: "preserve-3d",
+                    willChange: "transform",
                 }}
                 className="h-full relative group"
             >
@@ -86,11 +94,6 @@ const TiltCard = ({ children, index }: { children: React.ReactNode, index: numbe
 
 const Projects: React.FC = () => {
   const { t } = useLanguage();
-  // Extract unique categories
-  const categories = Array.from(new Set(PROJECTS.map(p => p.category)));
-  
-  // State for active category
-  const [activeCategory, setActiveCategory] = useState<string | null>(categories[0]);
 
   // Helper icons for Projects
   const getIcon = (i: number) => {
@@ -99,25 +102,8 @@ const Projects: React.FC = () => {
     return <Icon className="w-5 h-5 text-stone-400 group-hover:text-purple-900 transition-colors" strokeWidth={1.5} />;
   };
 
-  // Helper icons for Categories
-  const getCategoryIcon = (category: string) => {
-    if (category.includes('Big Data') || category.includes('Cloud') || category.includes('Data') || category.includes('Engineering') || category.includes('MLOps')) return <Database className="w-8 h-8 mb-4" strokeWidth={1} />;
-    if (category.includes('Vision')) return <ScanEye className="w-8 h-8 mb-4" strokeWidth={1} />;
-    if (category.includes('Business')) return <BarChart3 className="w-8 h-8 mb-4" strokeWidth={1} />;
-    if (category.includes('Sports')) return <Trophy className="w-8 h-8 mb-4" strokeWidth={1} />;
-    return <Folder className="w-8 h-8 mb-4" strokeWidth={1} />;
-  };
-
-  const getCategoryHint = (category: string) => {
-    if (category.includes('Big Data')) return 'AWS / Azure / Hadoop';
-    if (category.includes('Business')) return 'Dashboards & decision';
-    if (category.includes('Vision')) return 'Visual AI';
-    if (category.includes('Sports')) return 'Analytics ranking';
-    return 'Project archive';
-  };
-
   return (
-        <section id="projects" className="scroll-mt-28 md:scroll-mt-32 py-32 px-6 md:px-12 lg:px-24 relative overflow-hidden bg-stone-50/30">
+    <section id="projects" className="scroll-mt-28 md:scroll-mt-32 py-32 px-6 md:px-12 lg:px-24 relative overflow-hidden bg-stone-50/30">
        
        {/* Background: Digital Grid */}
        <div className="absolute inset-0 opacity-[0.05] pointer-events-none">
@@ -147,87 +133,20 @@ const Projects: React.FC = () => {
           </div>
         </div>
 
-        {/* 1. Horizontal Category Modules (Side by Side) */}
-        <div className="relative grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            <div className="hidden lg:block pointer-events-none absolute left-[10%] right-[10%] top-1/2 h-px bg-stone-200/70 overflow-hidden">
-                <motion.div
-                    className="h-px w-24 bg-purple-900/40"
-                    animate={{ x: ['-120%', '900%'] }}
-                    transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
-                />
-            </div>
-            {categories.map((category, idx) => {
-                const isActive = activeCategory === category;
-                const count = PROJECTS.filter(p => p.category === category).length;
-
-                return (
-                    <motion.button
-                        key={category}
-                        onClick={() => setActiveCategory(category)}
-                        whileHover={{ y: -5, boxShadow: "0 10px 30px -10px rgba(0,0,0,0.1)" }}
-                        whileTap={{ scale: 0.98 }}
-                        className={`
-                            relative z-10 overflow-hidden p-8 text-left border transition-all duration-300 group
-                            ${isActive 
-                                ? 'bg-white border-purple-900/30 shadow-xl shadow-purple-900/5' 
-                                : 'bg-white/40 border-stone-200 hover:bg-white hover:border-stone-300'
-                            }
-                        `}
-                    >
-                        {/* Active Indicator Scanline */}
-                        {isActive && (
-                            <motion.div 
-                                layoutId="activeGlow"
-                                className="absolute top-0 left-0 w-full h-1 bg-purple-900/50" 
-                            />
-                        )}
-
-                        {/* Icon */}
-                        <div className={`transition-colors duration-300 ${isActive ? 'text-purple-900' : 'text-stone-400 group-hover:text-stone-600'}`}>
-                            {getCategoryIcon(category)}
-                        </div>
-
-                        {/* Text */}
-                        <h4 className={`font-serif text-xl md:text-2xl mb-2 transition-colors duration-300 ${isActive ? 'text-obsidian' : 'text-stone-600'}`}>
-                            {category}
-                        </h4>
-
-                        <p className="font-mono text-[10px] uppercase tracking-widest text-stone-400 mb-4">
-                            {getCategoryHint(category)}
-                        </p>
-                        
-                        <div className="flex items-center gap-2">
-                             <div className={`h-px flex-1 transition-colors duration-300 ${isActive ? 'bg-purple-900/20' : 'bg-stone-200'}`} />
-                             <span className="font-mono text-xs text-stone-400">{count} {t(UI_TEXT.projects.files)}</span>
-                        </div>
-
-                        {/* Decorative Background Tech */}
-                        <div className="absolute -bottom-4 -right-4 text-[100px] leading-none font-bold text-stone-100 opacity-20 pointer-events-none select-none font-sans">
-                            0{idx + 1}
-                        </div>
-                    </motion.button>
-                );
-            })}
-        </div>
-
-        {/* 2. Projects Display Area (Appears below) */}
         <div className="min-h-[400px]">
-            <AnimatePresence mode="wait">
-                {activeCategory && (
-                    <motion.div
-                        key={activeCategory}
-                        exit={{ opacity: 0, y: -20 }}
-                        className="grid md:grid-cols-2 gap-8"
-                    >
-                        {PROJECTS.filter(p => p.category === activeCategory).map((project, index) => (
-                            <TiltCard key={t(project.title)} index={index}>
+            <motion.div className="grid md:grid-cols-2 xl:grid-cols-4 gap-5 items-start">
+                {PROJECTS.map((project, index) => {
+                    const subProject = (project as any).subProject;
+                    return (
+                        <div key={t(project.title)} className="flex flex-col gap-6">
+                            <TiltCard index={index}>
                                 <a 
                                     href={project.url} 
                                     target="_blank" 
                                     rel="noopener noreferrer"
                                     className="block h-full"
                                 >
-                                    <div className="bg-white border border-stone-200 p-8 h-full flex flex-col justify-between relative transition-all duration-500 hover:border-purple-900/30 hover:shadow-2xl shadow-stone-200/50 rounded-lg transform-style-3d cursor-pointer">
+                                    <div className="bg-white border border-stone-200 h-[520px] flex flex-col justify-between relative transition-all duration-500 hover:border-purple-900/30 hover:shadow-2xl shadow-stone-200/50 rounded-lg transform-style-3d cursor-pointer overflow-hidden">
                                         
                                         {/* Tech Corner Brackets */}
                                         <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-stone-400 group-hover:border-purple-900/50 transition-colors" />
@@ -235,9 +154,26 @@ const Projects: React.FC = () => {
                                         <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-stone-400 group-hover:border-purple-900/50 transition-colors" />
                                         <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-stone-400 group-hover:border-purple-900/50 transition-colors" />
 
+                                        {'image' in project && project.image && (
+                                            <div
+                                                className="relative z-10 h-36 overflow-hidden border-b border-stone-200 bg-stone-100"
+                                                style={{ transform: "translateZ(12px)" }}
+                                            >
+                                                <img 
+                                                    src={project.image} 
+                                                    alt={`${t(project.title)} preview`}
+                                                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+                                                />
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
+                                                <span className="absolute bottom-3 left-4 font-mono text-[10px] uppercase tracking-widest text-white/85">
+                                                    {project.category}
+                                                </span>
+                                            </div>
+                                        )}
+
                                         {/* Card Content (Lifted slightly in Z-space) */}
-                                        <div className="relative z-10" style={{ transform: "translateZ(20px)" }}>
-                                            <div className="flex justify-between items-start mb-6">
+                                        <div className="relative z-10 p-5 flex-1" style={{ transform: "translateZ(20px)" }}>
+                                            <div className="flex justify-between items-start mb-4">
                                                 <div className="flex items-center gap-3">
                                                     <span className="font-mono text-[10px] font-bold text-stone-400 border border-stone-200 px-1 rounded">
                                                         SYS-{index}
@@ -247,23 +183,23 @@ const Projects: React.FC = () => {
                                                 <ArrowUpRight className="w-5 h-5 text-stone-300 group-hover:text-obsidian group-hover:translate-x-1 group-hover:-translate-y-1 transition-all duration-300" />
                                             </div>
                                             
-                                            <h4 className="font-serif text-2xl text-obsidian mb-2 group-hover:text-purple-900 transition-colors">
+                                            <h4 className="font-serif text-xl leading-tight text-obsidian mb-2 group-hover:text-purple-900 transition-colors">
                                                 {t(project.title)}
                                             </h4>
                                             
-                                            <p className="font-sans text-[10px] font-bold tracking-widest text-stone-500 uppercase mb-4">
+                                            <p className="font-sans text-[9px] font-bold tracking-widest text-stone-500 uppercase mb-3 min-h-[28px]">
                                                 {t(project.subtitle)}
                                             </p>
                                             
-                                            <p className="font-sans text-sm text-stone-600 leading-relaxed">
+                                            <p className="font-sans text-xs text-stone-600 leading-relaxed line-clamp-5">
                                                 {t(project.description)}
                                             </p>
                                         </div>
 
                                         {/* Tags (Lifted less in Z-space) */}
-                                        <div className="relative z-10 pt-6 mt-6 border-t border-stone-100/50 flex flex-wrap gap-2" style={{ transform: "translateZ(10px)" }}>
+                                        <div className="relative z-10 p-5 pt-4 mt-0 border-t border-stone-100/50 flex flex-wrap gap-1.5 min-h-[86px]" style={{ transform: "translateZ(10px)" }}>
                                             {project.tags.map((tag, i) => (
-                                                <span key={i} className="text-[10px] font-mono text-stone-400 bg-stone-50 px-2 py-1 rounded">
+                                                <span key={i} className="text-[9px] font-mono text-stone-400 bg-stone-50 px-1.5 py-0.5 rounded">
                                                     {tag}
                                                 </span>
                                             ))}
@@ -271,12 +207,194 @@ const Projects: React.FC = () => {
                                     </div>
                                 </a>
                             </TiltCard>
-                        ))}
-                    </motion.div>
-                )}
-            </AnimatePresence>
+
+                            {subProject && (
+                                <>
+                                    {/* Visual Connector */}
+                                    <div className="flex flex-col items-center -my-3 relative z-20">
+                                        <div className="w-[1.5px] h-4 bg-gradient-to-b from-purple-900/30 to-purple-900/60 border-dashed border-l border-purple-900/40" />
+                                        <div className="bg-white text-purple-950 font-mono text-[9px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider border border-purple-900/20 shadow-sm flex items-center gap-1.5">
+                                            <span className="w-1.5 h-1.5 rounded-full bg-purple-900 animate-pulse" />
+                                            {t({ en: "DATA SOURCE", pt: "FONTE DE DADOS" })}
+                                        </div>
+                                        <div className="w-[1.5px] h-4 bg-gradient-to-b from-purple-900/60 to-purple-900/30 border-dashed border-l border-purple-900/40" />
+                                    </div>
+                                    
+                                    {/* Simpler connected card */}
+                                    {subProject.url ? (
+                                        <a 
+                                            href={subProject.url} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            className="block bg-white/75 backdrop-blur-sm border border-stone-200/80 rounded-lg p-4 relative transition-all duration-300 hover:border-purple-900/30 hover:bg-white hover:shadow-xl group cursor-pointer"
+                                        >
+                                            {/* Tech Corner Brackets */}
+                                            <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-stone-300 group-hover:border-purple-900/30 transition-colors" />
+                                            <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-stone-300 group-hover:border-purple-900/30 transition-colors" />
+                                            <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-stone-300 group-hover:border-purple-900/30 transition-colors" />
+                                            <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-stone-300 group-hover:border-purple-900/30 transition-colors" />
+                                            
+                                            <div className="flex justify-between items-start mb-3">
+                                                <div className="flex items-center gap-3">
+                                                    <span className="font-mono text-[10px] font-bold text-stone-400 border border-stone-200 px-1 rounded">
+                                                        {subProject.code}
+                                                    </span>
+                                                    <Database className="w-4 h-4 text-stone-400 group-hover:text-purple-900 transition-colors" />
+                                                </div>
+                                                <ArrowUpRight className="w-4 h-4 text-stone-300 group-hover:text-obsidian group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-300" />
+                                            </div>
+                                            
+                                            <h4 className="font-serif text-base leading-tight text-obsidian mb-1 group-hover:text-purple-900 transition-colors">
+                                                {t(subProject.title)}
+                                            </h4>
+                                            
+                                            <p className="font-sans text-[8px] font-bold tracking-widest text-stone-500 uppercase mb-2">
+                                                {t(subProject.subtitle)}
+                                            </p>
+                                            
+                                            <p className="font-sans text-[11px] text-stone-600 leading-relaxed mb-3 line-clamp-4">
+                                                {t(subProject.description)}
+                                            </p>
+                                            
+                                            <div className="flex flex-wrap gap-1.5">
+                                                {subProject.tags.map((tag: string, i: number) => (
+                                                    <span key={i} className="text-[8px] font-mono text-stone-400 bg-stone-50 px-1.5 py-0.5 rounded border border-stone-100">
+                                                        {tag}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </a>
+                                    ) : (
+                                        <div className="bg-white/75 backdrop-blur-sm border border-stone-200/80 rounded-lg p-6 relative transition-all duration-300 hover:border-purple-900/30 hover:bg-white hover:shadow-xl group">
+                                            {/* Tech Corner Brackets */}
+                                            <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-stone-300 group-hover:border-purple-900/30 transition-colors" />
+                                            <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-stone-300 group-hover:border-purple-900/30 transition-colors" />
+                                            <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-stone-300 group-hover:border-purple-900/30 transition-colors" />
+                                            <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-stone-300 group-hover:border-purple-900/30 transition-colors" />
+                                            
+                                            <div className="flex justify-between items-start mb-4">
+                                                <div className="flex items-center gap-3">
+                                                    <span className="font-mono text-[10px] font-bold text-stone-400 border border-stone-200 px-1 rounded">
+                                                        {subProject.code}
+                                                    </span>
+                                                    <Database className="w-4 h-4 text-stone-400 group-hover:text-purple-900 transition-colors" />
+                                                </div>
+                                            </div>
+                                            
+                                            <h4 className="font-serif text-lg text-obsidian mb-1 group-hover:text-purple-900 transition-colors">
+                                                {t(subProject.title)}
+                                            </h4>
+                                            
+                                            <p className="font-sans text-[9px] font-bold tracking-widest text-stone-500 uppercase mb-3">
+                                                {t(subProject.subtitle)}
+                                            </p>
+                                            
+                                            <p className="font-sans text-xs text-stone-600 leading-relaxed mb-4">
+                                                {t(subProject.description)}
+                                            </p>
+                                            
+                                            <div className="flex flex-wrap gap-1.5">
+                                                {subProject.tags.map((tag: string, i: number) => (
+                                                    <span key={i} className="text-[9px] font-mono text-stone-400 bg-stone-50 px-1.5 py-0.5 rounded border border-stone-100">
+                                                        {tag}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                    );
+                })}
+            </motion.div>
         </div>
 
+        {/* Subsection: Generative AI & LLMs */}
+        <div className="mt-24 pt-16 border-t border-stone-200/50">
+          <div className="mb-10">
+             <span className="font-mono text-xs text-purple-900/60 mb-2 block">{t({ en: "02.1 / LAB", pt: "02.1 / LAB" })}</span>
+             <h4 className="font-serif text-2xl md:text-3xl text-obsidian italic">
+               {t({ en: "Generative AI & LLM Systems", pt: "Sistemas de IA Generativa & LLM" })}
+             </h4>
+          </div>
+
+          <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-5 items-start">
+             {GENAI_PROJECTS.map((project, index) => {
+                 const hasImage = 'image' in project && project.image;
+                 return (
+                     <TiltCard key={t(project.title)} index={index}>
+                         <a 
+                             href={project.url} 
+                             target="_blank" 
+                             rel="noopener noreferrer"
+                             className="block h-full"
+                         >
+                             <div className="bg-white border border-stone-200 h-[520px] flex flex-col justify-between relative transition-all duration-500 hover:border-purple-900/30 hover:shadow-2xl shadow-stone-200/50 rounded-lg transform-style-3d cursor-pointer overflow-hidden">
+                                 
+                                 {/* Tech Corner Brackets */}
+                                 <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-stone-400 group-hover:border-purple-900/50 transition-colors" />
+                                 <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-stone-400 group-hover:border-purple-900/50 transition-colors" />
+                                 <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-stone-400 group-hover:border-purple-900/50 transition-colors" />
+                                 <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-stone-400 group-hover:border-purple-900/50 transition-colors" />
+                                 
+                                 {hasImage && (
+                                     <div 
+                                         className="relative h-36 overflow-hidden border-b border-stone-200 bg-stone-100 w-full"
+                                         style={{ 
+                                             transform: "translateZ(12px)"
+                                         }}
+                                     >
+                                         <img 
+                                             src={project.image} 
+                                             alt={`${t(project.title)} preview`}
+                                             className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+                                         />
+                                         <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
+                                         <span className="absolute bottom-3 left-4 font-mono text-[10px] uppercase tracking-widest text-white/85">
+                                             {(project as any).category}
+                                         </span>
+                                     </div>
+                                 )}
+
+                                 <div className="relative z-10 p-5 flex-1" style={{ transform: "translateZ(20px)" }}>
+                                     <div className="flex justify-between items-start mb-4">
+                                         <div className="flex items-center gap-3">
+                                             <span className="font-mono text-[10px] font-bold text-stone-400 border border-stone-200 px-1 rounded">
+                                                 {project.code}
+                                             </span>
+                                             <Brain className="w-4 h-4 text-stone-400 group-hover:text-purple-900 transition-colors" />
+                                         </div>
+                                         <ArrowUpRight className="w-5 h-5 text-stone-300 group-hover:text-obsidian group-hover:translate-x-1 group-hover:-translate-y-1 transition-all duration-300" />
+                                     </div>
+                                     
+                                     <h4 className="font-serif text-xl leading-tight text-obsidian mb-2 group-hover:text-purple-900 transition-colors">
+                                         {t(project.title)}
+                                     </h4>
+                                     
+                                     <p className="font-sans text-[9px] font-bold tracking-widest text-stone-500 uppercase mb-3 min-h-[28px]">
+                                         {t(project.subtitle)}
+                                     </p>
+                                     
+                                     <p className="font-sans text-xs text-stone-600 leading-relaxed line-clamp-5">
+                                         {t(project.description)}
+                                     </p>
+                                 </div>
+                                 
+                                 <div className="relative z-10 p-5 pt-4 mt-0 border-t border-stone-100/50 flex flex-wrap gap-1.5 min-h-[86px]" style={{ transform: "translateZ(10px)" }}>
+                                     {project.tags.map((tag: string, i: number) => (
+                                         <span key={i} className="text-[9px] font-mono text-stone-400 bg-stone-50 px-1.5 py-0.5 rounded">
+                                             {tag}
+                                         </span>
+                                     ))}
+                                 </div>
+                             </div>
+                         </a>
+                     </TiltCard>
+                 );
+             })}
+          </div>
+        </div>
       </div>
     </section>
   );

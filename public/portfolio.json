@@ -1,0 +1,121 @@
+{
+  "name": "Jeová Anderson",
+  "role": "Analista de Dados e Especialista em Business Intelligence",
+  "site": "https://geovatatsuga.github.io/portifolio/",
+  "email": "jeova.herminio@gmail.com",
+  "github": "https://github.com/geovatatsuga",
+  "linkedin": "https://www.linkedin.com/in/jeova-anderson/",
+  "medium": "https://medium.com/@jeova.anderson",
+  "summary": "Profissional de dados com foco em Business Intelligence, Ciência de Dados, Machine Learning, Engenharia de Dados, Azure Databricks, Delta Lake, PySpark, MLflow, Power BI, Dash, Plotly, IA Generativa e LLMs.",
+  "skills": [
+    "Python",
+    "SQL",
+    "Pandas",
+    "NumPy",
+    "Scikit-learn",
+    "Random Forest",
+    "K-Means",
+    "RFM",
+    "Dash",
+    "Plotly",
+    "Power BI",
+    "DAX",
+    "Azure Databricks",
+    "Delta Lake",
+    "PySpark",
+    "MLflow",
+    "Data Engineering",
+    "Business Intelligence",
+    "Generative AI",
+    "LLMs",
+    "RAG",
+    "Chatbots"
+  ],
+  "projects": [
+    {
+      "code": "SYS-0",
+      "name": "Fraud Risk BI",
+      "category": "Business Intelligence",
+      "description": "Interface de BI interativa para análise de risco de fraude, com foco em leitura rápida, hierarquia visual, cards de KPI e gráficos prontos para decisão.",
+      "url": "https://fraud-risk-bi.vercel.app/",
+      "tags": ["Business Intelligence", "Data Science", "Python", "SQL", "Dashboard", "Fraud Detection"]
+    },
+    {
+      "code": "SYS-0-DATA",
+      "name": "Detecção de Fraudes Lakehouse",
+      "category": "Data Engineering e Machine Learning",
+      "description": "Pipeline lakehouse ponta a ponta para detecção de fraudes processando 6,36M+ transações PaySim em camadas Bronze, Silver e Gold. Random Forest com features alcançou 99,45% de recall e R$ 73,21M de ganho financeiro simulado.",
+      "url": "https://medium.com/@jeova.anderson/construindo-uma-pipeline-de-detec%C3%A7%C3%A3o-de-fraudes-com-azure-databricks-delta-lake-e-machine-learning-007af284a4d3",
+      "tags": ["Azure Databricks", "Delta Lake", "PySpark", "MLflow", "Random Forest", "Fraud Detection", "Feature Engineering", "PaySim"]
+    },
+    {
+      "code": "SYS-1",
+      "name": "Segmentação de Clientes",
+      "category": "Business Intelligence",
+      "description": "Segmentação comportamental com features RFM, transformações estatísticas e K-Means. Classificação de clientes em 10 subgrupos de negócio e 4 clusters, entregue em dashboard interativo com Dash e Plotly.",
+      "url": "https://medium.com/@jeova.anderson/segmenta%C3%A7%C3%A3o-de-clientes-com-rfm-k-means-4e75c98f00d9",
+      "tags": ["Python", "K-Means", "RFM", "Plotly", "Dash", "Customer Analytics"]
+    },
+    {
+      "code": "SYS-2",
+      "name": "Previsão de Churn",
+      "category": "Business Intelligence",
+      "description": "Solução integrada de churn com extração via SQL Server, pré-processamento em Python, Random Forest em 1.926 amostras e dashboards Dash/Plotly. Resultado de 81% de acurácia e análise dos principais fatores de churn.",
+      "url": "https://medium.com/@jeova.anderson/3-dashboards-1-objetivo-prevendo-e-evitando-churn-com-random-forest-d729f9b289a4",
+      "tags": ["SQL", "Pandas", "Random Forest", "Dash", "Plotly", "Churn Analytics"]
+    },
+    {
+      "code": "SYS-3",
+      "name": "Cereus CRM",
+      "category": "Data Analytics",
+      "description": "Interface CRM para organizar dados de clientes, ações e contexto de negócio com fluxo limpo e estrutura visual pronta para analytics.",
+      "url": "https://cereus-snowy.vercel.app/",
+      "tags": ["CRM", "Data Analytics", "Business Intelligence", "React", "Dashboard", "Customer Data"]
+    },
+    {
+      "code": "GEN-0",
+      "name": "MythosEngine",
+      "category": "Generative AI e LLMs",
+      "description": "Arquitetura multiagente para gerar narrativas longas e coerentes com memória estruturada, apoiando roteiros, livros e fluxos de produção criativa.",
+      "tags": ["Generative AI", "LLMs", "Multi-Agent Systems", "Python", "LangChain", "Memory Systems"]
+    },
+    {
+      "code": "SYS-1",
+      "name": "Big Bang Theory",
+      "category": "FrontEnd Develop e AI-ready Interface",
+      "description": "Projeto front-end temático com organização de conteúdo, ritmo visual e interação responsiva, transformando cultura pop em uma interface polida que pode evoluir para experiências de IA baseadas em personagens.",
+      "url": "https://big-bang-theory-sigma.vercel.app/",
+      "tags": ["FrontEnd Develop", "React", "JavaScript", "Responsive UI", "Character UI", "AI Interface"]
+    },
+    {
+      "code": "GEN-1",
+      "name": "Novel-to-Webtoon Pipeline",
+      "category": "Generative AI e Pipeline Multimodal",
+      "description": "Pipeline ponta a ponta que converte capítulos de webnovel em quadrinhos digitais, combinando roteirização com LLMs e fluxos de imagem generativa para consistência visual.",
+      "tags": ["Generative AI", "LLMs", "Stable Diffusion", "Prompt Engineering", "Multimodal", "Pipeline"]
+    }
+  ],
+  "experience": [
+    {
+      "company": "Vsoft Tecnologia",
+      "role": "Estagiário de Dados e Governança",
+      "period": "07/2025 - 12/2025",
+      "highlights": [
+        "Sistema RAG para consulta de documentação interna, reduzindo tempo de busca manual em aproximadamente 40%.",
+        "Participação no chatbot corporativo Vivi, automatizando mais de 200 interações mensais.",
+        "Automação de e-mails de gestão de contratos com Python, eliminando cerca de 3 horas semanais de trabalho manual.",
+        "Dashboard integrada consolidando KPIs de 3 áreas, adotada pela liderança para monitoramento mensal."
+      ]
+    },
+    {
+      "company": "Arquivo dos Governadores",
+      "role": "Estagiário de Organização de Dados",
+      "period": "01/2024 - 12/2024",
+      "highlights": [
+        "Organização e digitalização de mais de 1.200 documentos históricos.",
+        "Criação de tabelas dinâmicas no Excel, reduzindo o tempo de sistematização documental em aproximadamente 50%.",
+        "Reestruturação do fluxo de contagem e classificação de acervos, aumentando a produtividade em aproximadamente 30%."
+      ]
+    }
+  ]
+}
