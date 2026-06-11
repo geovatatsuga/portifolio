@@ -1,0 +1,51 @@
+# Jeová Anderson - Data Science, BI & AI Portfolio
+
+Jeová Anderson is a Data Analyst and Business Intelligence specialist focused on Data Science, Machine Learning, Data Engineering, Azure Databricks, Delta Lake, PySpark, MLflow, Power BI, Dash, Plotly, Generative AI and LLM systems.
+
+Website: https://geovatatsuga.github.io/portifolio/
+Structured JSON: https://geovatatsuga.github.io/portifolio/portfolio.json
+GitHub: https://github.com/geovatatsuga
+LinkedIn: https://www.linkedin.com/in/jeova-anderson/
+Medium: https://medium.com/@jeova.anderson
+
+## Main Projects
+
+### Fraud Risk BI
+Interactive BI interface for fraud-risk analysis, focused on fast reading, visual hierarchy, KPI cards and decision-ready charts for operational monitoring.
+URL: https://fraud-risk-bi.vercel.app/
+Tags: Business Intelligence, Data Science, Python, SQL, Dashboard, Fraud Detection.
+
+### Detecção de Fraudes Lakehouse
+End-to-end lakehouse pipeline for fraud detection, processing 6.36M+ PaySim transactions across Bronze, Silver and Gold layers. Random Forest with engineered features achieved 99.45% recall and R$ 73.21M in simulated financial savings.
+URL: https://medium.com/@jeova.anderson/construindo-uma-pipeline-de-detec%C3%A7%C3%A3o-de-fraudes-com-azure-databricks-delta-lake-e-machine-learning-007af284a4d3
+Tags: Azure Databricks, Delta Lake, PySpark, MLflow, Random Forest, Fraud Detection, Feature Engineering, PaySim.
+
+### Segmentação de Clientes
+Behavioral customer segmentation with RFM features, statistical transformations and K-Means. Customers were classified into 10 business subgroups and 4 clusters, delivered through an interactive Dash and Plotly dashboard.
+URL: https://medium.com/@jeova.anderson/segmenta%C3%A7%C3%A3o-de-clientes-com-rfm-k-means-4e75c98f00d9
+Tags: Python, K-Means, RFM, Plotly, Dash, Customer Analytics.
+
+### Previsão de Churn
+Integrated churn solution with SQL Server extraction, Python preprocessing, Random Forest training on 1,926 samples and Dash/Plotly dashboards. The model reached 81% accuracy and highlighted the main churn drivers.
+URL: https://medium.com/@jeova.anderson/3-dashboards-1-objetivo-prevendo-e-evitando-churn-com-random-forest-d729f9b289a4
+Tags: SQL, Pandas, Random Forest, Dash, Plotly, Churn Analytics.
+
+### Cereus CRM
+CRM-style product interface for organizing customer data, actions and business context with a cleaner workflow and analytics-ready visual structure.
+URL: https://cereus-snowy.vercel.app/
+Tags: CRM, Data Analytics, Business Intelligence, React, Dashboard, Customer Data.
+
+## Generative AI & LLM Projects
+
+### MythosEngine
+Multi-agent architecture for generating long, coherent narratives with structured memory, designed to support complex scripts, books and creative production workflows.
+Tags: Generative AI, LLMs, Multi-Agent Systems, Python, LangChain, Memory Systems.
+
+### Big Bang Theory
+Themed front-end project with content organization, visual rhythm and responsive interaction, designed as a polished character-driven interface that can evolve into AI character experiences.
+URL: https://big-bang-theory-sigma.vercel.app/
+Tags: FrontEnd Develop, React, JavaScript, Responsive UI, Character UI, AI Interface.
+
+### Novel-to-Webtoon Pipeline
+End-to-end pipeline that converts webnovel chapters into digital comics by combining LLM-based scripting with generative image workflows for visual consistency.
+Tags: Generative AI, LLMs, Stable Diffusion, Prompt Engineering, Multimodal, Pipeline.
