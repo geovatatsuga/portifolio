@@ -63,6 +63,31 @@ export const PROJECTS = [
     }
   },
   {
+    title: { en: "Sales Intelligence", pt: "Sales Intelligence" },
+    category: "Business Intelligence",
+    subtitle: { en: "Executive sales BI with PySpark", pt: "BI executivo de vendas com PySpark" },
+    date: "2026",
+    image: `${import.meta.env.BASE_URL}project-sales-intelligence.png`,
+    imageRatio: "1880 / 857",
+    tags: ["Business Intelligence", "PySpark", "Dashboard", "Sales Analytics", "KPI", "Data Visualization"],
+    description: {
+      en: "Executive sales dashboard for RCD Corp, combining refined KPI cards, monthly revenue analysis, country and channel views, product curves, quality checks, outliers and ML forecasting for business decisions.",
+      pt: "Dashboard executivo de vendas para a RCD Corp, combinando cards de KPI, análise de receita mensal, visões por país e canal, curva de produtos, qualidade, outliers e forecast com ML para decisões de negócio."
+    },
+    url: "https://sales-intelligence-ashen.vercel.app/",
+    subProject: {
+      title: { en: "Sales Intelligence BI Article", pt: "Artigo Sales Intelligence BI" },
+      subtitle: { en: "PySpark sales analytics case study", pt: "Estudo de caso de vendas com PySpark" },
+      code: "SYS-1-DATA",
+      url: "https://medium.com/@jeova.anderson/sales-intelligence-bi-de-vendas-com-pyspark-de4132be993b",
+      description: {
+        en: "Technical article covering the Sales Intelligence BI workflow, with PySpark-based sales analysis and business intelligence decisions behind the executive dashboard.",
+        pt: "Artigo técnico sobre o fluxo do Sales Intelligence BI, com análise de vendas em PySpark e decisões de business intelligence por trás do dashboard executivo."
+      },
+      tags: ["PySpark", "Sales Analytics", "Business Intelligence", "Data Engineering", "Dashboard", "Medium"]
+    }
+  },
+  {
     title: { en: "Customer Segmentation", pt: "Segmentação de Clientes" },
     category: "Business Intelligence",
     subtitle: { en: "RFM + K-means Clustering", pt: "RFM + Clusterização K-means" },

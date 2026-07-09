@@ -50,6 +50,22 @@
     },
     {
       "code": "SYS-1",
+      "name": "Sales Intelligence",
+      "category": "Business Intelligence",
+      "description": "Dashboard executivo de vendas para a RCD Corp, combinando cards de KPI, análise de receita mensal, visões por país e canal, curva de produtos, qualidade, outliers e forecast com ML para decisões de negócio.",
+      "url": "https://sales-intelligence-ashen.vercel.app/",
+      "tags": ["Business Intelligence", "PySpark", "Dashboard", "Sales Analytics", "KPI", "Data Visualization"]
+    },
+    {
+      "code": "SYS-1-DATA",
+      "name": "Sales Intelligence BI com PySpark",
+      "category": "Business Intelligence e Data Engineering",
+      "description": "Artigo técnico sobre o fluxo do Sales Intelligence BI, com análise de vendas em PySpark e decisões de business intelligence por trás do dashboard executivo.",
+      "url": "https://medium.com/@jeova.anderson/sales-intelligence-bi-de-vendas-com-pyspark-de4132be993b",
+      "tags": ["PySpark", "Sales Analytics", "Business Intelligence", "Data Engineering", "Dashboard", "Medium"]
+    },
+    {
+      "code": "SYS-2",
       "name": "Segmentação de Clientes",
       "category": "Business Intelligence",
       "description": "Segmentação comportamental com features RFM, transformações estatísticas e K-Means. Classificação de clientes em 10 subgrupos de negócio e 4 clusters, entregue em dashboard interativo com Dash e Plotly.",
@@ -57,7 +73,7 @@
       "tags": ["Python", "K-Means", "RFM", "Plotly", "Dash", "Customer Analytics"]
     },
     {
-      "code": "SYS-2",
+      "code": "SYS-3",
       "name": "Previsão de Churn",
       "category": "Business Intelligence",
       "description": "Solução integrada de churn com extração via SQL Server, pré-processamento em Python, Random Forest em 1.926 amostras e dashboards Dash/Plotly. Resultado de 81% de acurácia e análise dos principais fatores de churn.",
@@ -65,7 +81,7 @@
       "tags": ["SQL", "Pandas", "Random Forest", "Dash", "Plotly", "Churn Analytics"]
     },
     {
-      "code": "SYS-3",
+      "code": "SYS-4",
       "name": "Cereus CRM",
       "category": "Data Analytics",
       "description": "Interface CRM para organizar dados de clientes, ações e contexto de negócio com fluxo limpo e estrutura visual pronta para analytics.",
