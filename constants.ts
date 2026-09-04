@@ -13,16 +13,16 @@ export const PROFILE = {
   },
   // Short related titles rendered under the main role in the hero section
   titles: {
-    en: "Data Analytics • Business Intelligence • RPA / UiPath • Python • SQL • Artificial Intelligence",
-    pt: "Data Analytics • Business Intelligence • RPA / UiPath • Python • SQL • Inteligência Artificial"
+    en: "Data Analytics • Business Intelligence • Automation • Python • SQL • Artificial Intelligence",
+    pt: "Data Analytics • Business Intelligence • Automação • Python • SQL • Inteligência Artificial"
   },
   about: {
-    en: `I work at the intersection of Data, Automation and Artificial Intelligence, developing solutions that turn information into decisions and manual processes into more efficient workflows.
+    en: `I develop intelligent solutions that combine data, automation and artificial intelligence to improve processes and support decision-making.
 
-My foundation in Data Science combines analytics, Business Intelligence, Python and SQL with process automation and systems integration. I am currently also developing RPA solutions with UiPath, exploring AI as part of automation workflows.`,
-    pt: `Trabalho na interseção entre Dados, Automação e Inteligência Artificial, desenvolvendo soluções que transformam informação em decisão e processos manuais em fluxos mais eficientes.
+My work involves data analytics, Business Intelligence, Python, SQL, systems integration and automation. I use RPA with UiPath as one of the tools for turning manual activities into more efficient processes.`,
+    pt: `Desenvolvo soluções inteligentes que unem dados, automação e inteligência artificial para melhorar processos e apoiar decisões.
 
-Minha base em Ciência de Dados combina analytics, Business Intelligence, Python e SQL com automação de processos e integração entre sistemas. Atualmente também desenvolvo soluções de RPA com UiPath, explorando IA como parte de fluxos de automação.`
+Meu trabalho envolve análise de dados, Business Intelligence, Python, SQL, integração entre sistemas e automações. Utilizo RPA com UiPath como uma das ferramentas para transformar atividades manuais em processos mais eficientes.`
   },
   contact: {
     email: "jeova.herminio@gmail.com",

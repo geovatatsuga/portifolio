@@ -1,6 +1,6 @@
-# Jeová Anderson - Data Science, BI & AI Portfolio
+# Jeová Anderson - Data, Automation & AI Portfolio
 
-Jeová Anderson is a Data Analyst and Business Intelligence specialist focused on Data Science, Machine Learning, Data Engineering, Azure Databricks, Delta Lake, PySpark, MLflow, Power BI, Dash, Plotly, Generative AI and LLM systems.
+Jeová Anderson develops intelligent solutions that combine data, automation and artificial intelligence to improve processes and support decision-making. His work includes Data Analytics, Business Intelligence, Python, SQL, systems integration, RPA, Google Apps Script, Google Sheets and Gmail automation.
 
 Website: https://geovatatsuga.github.io/portifolio/
 Structured JSON: https://geovatatsuga.github.io/portifolio/portfolio.json
@@ -9,6 +9,11 @@ LinkedIn: https://www.linkedin.com/in/jeova-anderson/
 Medium: https://medium.com/@jeova.anderson
 
 ## Main Projects
+
+### Automação de Rotinas Contratuais
+Google Workspace automation that monitors contract deadlines and terms, sends preventive HTML alerts through Gmail and keeps an auditable history in Google Sheets. The solution uses a daily trigger and staged D-30, D-15, D-7 and D-0 alerts.
+Repository: https://github.com/geovatatsuga/automacao-rotinas-contratuais-appsscript
+Tags: Google Apps Script, Google Sheets, Gmail, Process Automation, Contract Management, JavaScript, Audit Logs, Preventive Alerts.
 
 ### Fraud Risk BI
 Interactive BI interface for fraud-risk analysis, focused on fast reading, visual hierarchy, KPI cards and decision-ready charts for operational monitoring.

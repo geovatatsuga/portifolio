@@ -6,7 +6,7 @@
   "github": "https://github.com/geovatatsuga",
   "linkedin": "https://www.linkedin.com/in/jeova-anderson/",
   "medium": "https://medium.com/@jeova.anderson",
-  "summary": "Profissional de dados com foco em Business Intelligence, Ciência de Dados, Machine Learning, Engenharia de Dados, Azure Databricks, Delta Lake, PySpark, MLflow, Power BI, Dash, Plotly, IA Generativa e LLMs.",
+  "summary": "Profissional que desenvolve soluções inteligentes em dados, automação e inteligência artificial, com Business Intelligence, Python, SQL, RPA, Google Apps Script e integração entre sistemas.",
   "skills": [
     "Python",
     "SQL",
@@ -26,12 +26,27 @@
     "MLflow",
     "Data Engineering",
     "Business Intelligence",
+    "Process Automation",
+    "RPA",
+    "UiPath",
+    "Google Apps Script",
+    "Google Sheets",
+    "Gmail",
+    "Systems Integration",
     "Generative AI",
     "LLMs",
     "RAG",
     "Chatbots"
   ],
   "projects": [
+    {
+      "code": "AUTO-3",
+      "name": "Automação de Rotinas Contratuais",
+      "category": "Automação de Processos e Gestão de Contratos",
+      "description": "Automação com Google Apps Script que monitora prazos e vigências contratuais, dispara alertas preventivos por Gmail e registra histórico auditável no Google Sheets.",
+      "url": "https://github.com/geovatatsuga/automacao-rotinas-contratuais-appsscript",
+      "tags": ["Google Apps Script", "Google Sheets", "Gmail", "Automação de Processos", "Gestão de Contratos", "JavaScript"]
+    },
     {
       "code": "SYS-0",
       "name": "Fraud Risk BI",
