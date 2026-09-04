@@ -4,26 +4,25 @@ import { Github, Linkedin, Mail, FileText, ExternalLink } from 'lucide-react';
 export const PROFILE = {
   name: "Jeová Anderson",
   role: {
-    en: "Data Analyst & BI Specialist",
-    pt: "Analista de Dados & Especialista em BI"
+    en: "Data & Automation Analyst",
+    pt: "Analista de Dados & Automação"
   },
   tagline: {
-    en: "Transforming data into strategic decisions through analytics, visualization, and business intelligence.",
-    pt: "Transformando dados em decisões estratégicas através de analytics, visualização e business intelligence."
+    en: "I build systems that turn data into decisions, processes into automations, and AI into operational capability.",
+    pt: "Construo sistemas que transformam dados em decisões, processos em automações e IA em capacidade operacional."
   },
   // Short related titles rendered under the main role in the hero section
   titles: {
-    en: "Data Analyst - Business Intelligence - Data Science - Python & SQL",
-    pt: "Analista de Dados - Business Intelligence - Ciência de Dados - Python & SQL"
+    en: "Data Analytics • Business Intelligence • RPA / UiPath • Python • SQL • Artificial Intelligence",
+    pt: "Data Analytics • Business Intelligence • RPA / UiPath • Python • SQL • Inteligência Artificial"
   },
   about: {
-    en: `Driven by curiosity and the desire to solve real business problems through data, I specialize in transforming raw data into actionable insights. 
-    I find true satisfaction in building analytical solutions that drive strategic decisions—whether optimizing processes, detecting fraud, or uncovering growth opportunities.
-    I believe that success in Data Analytics and Business Intelligence comes from the combination of technical rigor, business acumen, and continuous learning.
-    
-    With feet on the ground and eyes on the metrics, I seek to grow as a data professional and, at the same time, empower organizations to make evidence-based decisions.`,
-    pt: `Movido pela curiosidade e pelo desejo de resolver problemas reais de negócio através de dados, me especializo em transformar dados brutos em insights acionáveis.
-    Acredito que o sucesso em Análise de Dados e Business Intelligence vem da combinação de rigor técnico, visão de negócio e aprendizado contínuo.`
+    en: `I work at the intersection of Data, Automation and Artificial Intelligence, developing solutions that turn information into decisions and manual processes into more efficient workflows.
+
+My foundation in Data Science combines analytics, Business Intelligence, Python and SQL with process automation and systems integration. I am currently also developing RPA solutions with UiPath, exploring AI as part of automation workflows.`,
+    pt: `Trabalho na interseção entre Dados, Automação e Inteligência Artificial, desenvolvendo soluções que transformam informação em decisão e processos manuais em fluxos mais eficientes.
+
+Minha base em Ciência de Dados combina analytics, Business Intelligence, Python e SQL com automação de processos e integração entre sistemas. Atualmente também desenvolvo soluções de RPA com UiPath, explorando IA como parte de fluxos de automação.`
   },
   contact: {
     email: "jeova.herminio@gmail.com",
@@ -166,24 +165,20 @@ export const EXPERIENCE = [
 
 export const SKILLS = [
   {
-    category: { en: "Data Analytics", pt: "Análise de Dados" },
-    items: ["Python (Pandas, NumPy)", "SQL (PostgreSQL, MySQL)", "Data Cleaning", "EDA", "Statistical Analysis", "A/B Testing"]
+    category: { en: "01 / Data & BI", pt: "01 / Dados & BI" },
+    items: ["Python", "SQL", "Power BI", "Pandas", "PySpark", "DAX", "Data Visualization", "Analytics"]
   },
   {
-    category: { en: "Business Intelligence", pt: "Business Intelligence" },
-    items: ["Power BI", "DAX", "Data Modeling", "Dashboard Design", "KPI Definition", "Executive Reporting", "ETL/ELT Pipelines"]
+    category: { en: "02 / Automation & Integration", pt: "02 / Automação & Integração" },
+    items: ["UiPath", "RPA", "Python Automation", "REST APIs", "JSON", "SQL", "Git", "Process Automation"]
   },
   {
-    category: { en: "Data Science & ML", pt: "Ciência de Dados & ML" },
-    items: ["Scikit-learn", "Random Forest", "XGBoost", "Feature Engineering", "Model Evaluation", "MLflow", "PySpark"]
+    category: { en: "03 / AI Systems", pt: "03 / Sistemas de IA" },
+    items: ["LLMs", "RAG", "Multi-Agent Systems", "LangChain", "Machine Learning", "Scikit-learn", "Generative AI"]
   },
   {
-    category: { en: "Data Engineering", pt: "Engenharia de Dados" },
-    items: ["Azure Databricks", "Delta Lake", "Medallion Architecture", "Airflow", "Data Quality", "Data Governance"]
-  },
-  {
-    category: { en: "Tools & Visualization", pt: "Ferramentas & Visualização" },
-    items: ["Git", "GitHub", "Power BI", "Excel Advanced", "Jupyter", "VS Code", "Figma (Data Viz)"]
+    category: { en: "04 / Engineering & Cloud", pt: "04 / Engenharia & Cloud" },
+    items: ["Azure Databricks", "Delta Lake", "PySpark", "ETL / ELT", "Medallion Architecture", "Data Quality", "Git / GitHub"]
   }
 ];
 
@@ -207,12 +202,12 @@ export const UI_TEXT = {
   },
   hero: {
     scroll: { en: "Explore Projects", pt: "Explorar Projetos" },
-    active: { en: "Data Pipeline Active", pt: "Pipeline de Dados Ativo" }
+    active: { en: "System Mode: Hybrid", pt: "Modo do Sistema: Híbrido" }
   },
   about: {
     section: { en: "01. / PROFILE", pt: "01. / PERFIL" },
-    title: { en: "The Analyst", pt: "O Analista" },
-    subtitle: { en: "Behind the Insights", pt: "Por trás dos Insights" },
+    title: { en: "The professional", pt: "O profissional" },
+    subtitle: { en: "behind the systems", pt: "por trás dos sistemas" },
     focus: { en: "Primary Focus", pt: "Foco Principal" },
     based: { en: "Location", pt: "Localização" },
     remote: { en: "Available Remote", pt: "Disponível Remoto" },
@@ -220,8 +215,8 @@ export const UI_TEXT = {
     years: { en: "3+ Years", pt: "3+ Anos" }
   },
   projects: {
-    section: { en: "02. / PROJECTS", pt: "02. / PROJETOS" },
-    title: { en: "Data & BI Solutions", pt: "Soluções de Dados & BI" },
+    section: { en: "02. / SYSTEMS", pt: "02. / SISTEMAS" },
+    title: { en: "What I Build", pt: "O que eu construo" },
     interact: { en: "Click to Explore", pt: "Clique para Explorar" },
     files: { en: "FILES", pt: "ARQUIVOS" }
   },
@@ -259,8 +254,8 @@ export const UI_TEXT = {
     experience: { en: "Experience Log", pt: "Registro de Experiência" }
   },
   contact: {
-    signal: { en: "Signal detected. Data ready.", pt: "Sinal detectado. Dados prontos." },
-    title: { en: "Let's Build with Data.", pt: "Vamos Construir com Dados." },
+    signal: { en: "Data online. Automation active. AI ready.", pt: "Dados online. Automação ativa. IA pronta." },
+    title: { en: "Data to understand. Automation to execute. AI to go beyond.", pt: "Dados para entender. Automação para executar. IA para ir além." },
     system: { en: "System Nominal", pt: "Sistema Nominal" },
     rights: { en: "All rights reserved.", pt: "Todos os direitos reservados." }
   }

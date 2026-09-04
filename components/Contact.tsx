@@ -5,7 +5,7 @@ import { PROFILE, UI_TEXT } from '../constants';
 import { useLanguage } from './LanguageContext';
 
 const Contact: React.FC = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   return (
     <section id="contact" className="scroll-mt-28 md:scroll-mt-32 py-32 px-6 md:px-12 lg:px-24 bg-obsidian text-ivory relative overflow-hidden">
@@ -86,6 +86,11 @@ const Contact: React.FC = () => {
       </div>
       
       <div className="absolute bottom-6 left-0 w-full text-center">
+        <div className="flex justify-center gap-5 mb-3 font-mono text-[9px] tracking-widest text-stone-500">
+          <span>{language === 'pt' ? 'DADOS' : 'DATA'} <b className="text-green-500">ONLINE</b></span>
+          <span>RPA <b className="text-green-500">{language === 'pt' ? 'ATIVA' : 'ACTIVE'}</b></span>
+          <span>{language === 'pt' ? 'IA' : 'AI'} <b className="text-green-500">{language === 'pt' ? 'PRONTA' : 'READY'}</b></span>
+        </div>
         <div className="flex justify-center items-center gap-2 mb-2">
              <div className="w-1 h-1 bg-green-500 rounded-full animate-pulse" />
              <span className="text-[10px] text-stone-600 font-mono uppercase">{t(UI_TEXT.contact.system)}</span>

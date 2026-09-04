@@ -1,403 +1,61 @@
-import React, { useRef } from 'react';
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
-import { PROJECTS, UI_TEXT, GENAI_PROJECTS } from '../constants';
+import React, { useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ArrowUpRight, BarChart3, Bot, BrainCircuit, Check, ChevronDown, Circle, Github } from 'lucide-react';
+import { GENAI_PROJECTS, PROJECTS, UI_TEXT } from '../constants';
 import { useLanguage } from './LanguageContext';
-import { 
-  ArrowUpRight, 
-  Cpu, 
-  Activity, 
-  Database, 
-  GitBranch,
-  Brain
-} from 'lucide-react';
 
-// --- Sub-component: 3D Holographic Card ---
-const TiltCard = ({ children, index }: { children: React.ReactNode, index: number }) => {
-    const x = useMotionValue(0);
-    const y = useMotionValue(0);
+type Localized = { en: string; pt: string };
+type SystemKey = 'data' | 'automation' | 'ai';
+type ProjectItem = { title: Localized; subtitle: Localized; description: Localized; tags: string[]; url?: string; repositoryUrl?: string; badge?: Localized };
 
-    const mouseX = useSpring(x, { stiffness: 500, damping: 100 });
-    const mouseY = useSpring(y, { stiffness: 500, damping: 100 });
+const automationProjects: ProjectItem[] = [
+  { title: { en: 'ContractOps AI', pt: 'ContractOps AI' }, subtitle: { en: 'Intelligent contract registration', pt: 'Cadastramento inteligente de contratos' }, description: { en: 'Corporate RPA that validates contract data and business rules through an API, registers approved records in a legacy ERP and tracks operations in a control tower.', pt: 'RPA corporativo que valida dados contratuais e regras de negócio via API, cadastra contratos aprovados em ERP legado e acompanha a operação em uma torre de controle.' }, tags: ['UiPath', 'FastAPI', 'Python', 'RPA'], url: 'https://contractops-ai-seven.vercel.app/', repositoryUrl: 'https://github.com/geovatatsuga/contractops-ai', badge: { en: 'Featured · Live demo', pt: 'Destaque · Demo ao vivo' } },
+  { title: { en: 'Invoice & Purchase Order Reconciliation', pt: 'Automação de Conciliação de Faturas e Pedidos' }, subtitle: { en: 'Accounts payable RPA', pt: 'RPA para contas a pagar' }, description: { en: 'Automation that reads invoice PDFs, reconciles purchase orders, vendors, values and duplicates, then records approval or exception evidence.', pt: 'Automação que lê faturas em PDF, concilia pedidos, fornecedores, valores e duplicidades, registrando evidências de aprovação ou exceção.' }, tags: ['UiPath', 'Python', 'React', 'RPA'], url: 'https://dashboard-beta-snowy-87.vercel.app/', repositoryUrl: 'https://github.com/geovatatsuga/automacao-conciliacao-faturas-pedidos', badge: { en: 'Live demo', pt: 'Demo ao vivo' } }
+];
 
-    const rotateX = useTransform(mouseY, [-0.5, 0.5], ["10deg", "-10deg"]);
-    const rotateY = useTransform(mouseX, [-0.5, 0.5], ["-10deg", "10deg"]);
-
-    const rectRef = useRef<DOMRect | null>(null);
-
-    const handleMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => {
-        rectRef.current = e.currentTarget.getBoundingClientRect();
-    };
-
-    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-        if (!rectRef.current) {
-            rectRef.current = e.currentTarget.getBoundingClientRect();
-        }
-        const rect = rectRef.current;
-        const width = rect.width;
-        const height = rect.height;
-        const mouseXVal = e.clientX - rect.left;
-        const mouseYVal = e.clientY - rect.top;
-        const xPct = mouseXVal / width - 0.5;
-        const yPct = mouseYVal / height - 0.5;
-        x.set(xPct);
-        y.set(yPct);
-    };
-
-    const handleMouseLeave = () => {
-        rectRef.current = null;
-        x.set(0);
-        y.set(0);
-    };
-
-    return (
-        <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1, duration: 0.5 }}
-            style={{ perspective: 1000 }}
-            className="h-full"
-        >
-            <motion.div
-                onMouseEnter={handleMouseEnter}
-                onMouseMove={handleMouseMove}
-                onMouseLeave={handleMouseLeave}
-                style={{
-                    rotateX,
-                    rotateY,
-                    transformStyle: "preserve-3d",
-                    willChange: "transform",
-                }}
-                className="h-full relative group"
-            >
-                {children}
-                
-                {/* Holographic Glare Effect */}
-                <motion.div 
-                    style={{
-                        background: useTransform(
-                            mouseX, 
-                            [-0.5, 0.5], 
-                            [
-                                "linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.0) 45%, transparent 50%)",
-                                "linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.4) 45%, transparent 50%)" 
-                            ]
-                        ),
-                        opacity: useTransform(mouseX, [-0.5, 0.5], [0, 1])
-                    }}
-                    className="absolute inset-0 z-20 pointer-events-none rounded-xl"
-                />
-            </motion.div>
-        </motion.div>
-    );
+const sales = PROJECTS.find(project => project.title.en === 'Sales Intelligence');
+const dataProjects = [sales, ...PROJECTS.filter(project => project !== sales && project.title.en !== 'Cereus CRM')].filter(Boolean) as ProjectItem[];
+const aiProjects = GENAI_PROJECTS.filter(project => project.title.en !== 'Big Bang Theory') as ProjectItem[];
+const systems: Record<SystemKey, { code: string; title: Localized; kicker: Localized; description: Localized; status: Localized; projects: ProjectItem[] }> = {
+  data: { code: 'SYS.DATA', title: { en: 'Data Intelligence', pt: 'Inteligência de Dados' }, kicker: { en: 'Analytics • BI • Data Engineering', pt: 'Análise de Dados • BI • Engenharia de Dados' }, description: { en: 'Turning raw data into decisions and analytical systems.', pt: 'Transformando dados brutos em decisões e sistemas analíticos.' }, status: { en: 'Online', pt: 'Online' }, projects: dataProjects },
+  automation: { code: 'SYS.AUTO', title: { en: 'Automation Systems', pt: 'Sistemas de Automação' }, kicker: { en: 'RPA • Integration • Process Automation', pt: 'RPA • Integrações • Automação de Processos' }, description: { en: 'Turning repetitive processes into resilient automated workflows.', pt: 'Transformando processos repetitivos em fluxos automatizados e resilientes.' }, status: { en: 'Active', pt: 'Ativo' }, projects: automationProjects },
+  ai: { code: 'SYS.AI', title: { en: 'Intelligent Systems', pt: 'Sistemas Inteligentes' }, kicker: { en: 'LLMs • RAG • Agents • Generative AI', pt: 'LLMs • RAG • Agentes • IA Generativa' }, description: { en: 'Building systems that use AI as part of the process.', pt: 'Construindo sistemas que utilizam IA como parte do processo.' }, status: { en: 'Ready', pt: 'Pronto' }, projects: aiProjects }
 };
 
+const ptTags: Record<string, string> = { 'Business Intelligence': 'Inteligência de Negócios', 'Data Science': 'Ciência de Dados', 'Dashboard': 'Painel', 'Fraud Detection': 'Detecção de Fraudes', 'Sales Analytics': 'Análise de Vendas', 'Data Visualization': 'Visualização de Dados', 'Data Engineering': 'Engenharia de Dados', 'Generative AI': 'IA Generativa', 'Multi-Agent Systems': 'Sistemas Multiagentes', 'Process Automation': 'Automação de Processos', 'Python Automation': 'Automação com Python', 'Email Workflow': 'Fluxo de E-mails', '~3h/week': '~3h por semana' };
+
+const SystemVisual = ({ type }: { type: SystemKey }) => {
+  if (type === 'data') return <div className="flex h-20 items-end gap-2" aria-hidden="true">{[32,55,42,78,62,92,70].map((h,i) => <motion.span key={i} className="w-full border-t border-purple-900/50 bg-purple-900/5" animate={{ height: [`${h}%`,`${Math.max(20,h-22)}%`,`${h}%`] }} transition={{ duration: 2.8, delay: i*.12, repeat: Infinity }} />)}</div>;
+  if (type === 'automation') return <div className="flex h-20 items-center text-stone-500" aria-hidden="true">{[Circle,Check,Check,Bot,Check].map((Icon,i) => <React.Fragment key={i}><motion.span animate={{ scale: [1,1.18,1] }} transition={{ duration: 1.8, delay: i*.25, repeat: Infinity }}><Icon className="w-5 h-5" /></motion.span>{i<4 && <motion.span className="h-px flex-1 bg-stone-300" animate={{ opacity:[.25,1,.25] }} transition={{ duration:1.8,delay:i*.25,repeat:Infinity }}/>}</React.Fragment>)}</div>;
+  return <div className="relative h-20" aria-hidden="true">{[[12,44],[32,18],[52,56],[72,25],[88,62]].map(([l,t],i)=><motion.span key={i} className="absolute h-2 w-2 rounded-full bg-purple-900/50" style={{left:`${l}%`,top:`${t}%`}} animate={{opacity:[.25,1,.25],scale:[.8,1.4,.8]}} transition={{duration:2.5,delay:i*.35,repeat:Infinity}}/>)}<svg className="absolute inset-0 h-full w-full stroke-stone-300"><path d="M12 38 L32 16 L52 45 L72 20 L88 50" fill="none" strokeWidth="1" strokeDasharray="3 4"/></svg></div>;
+};
 
 const Projects: React.FC = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const [hovered, setHovered] = useState<SystemKey | null>(null);
+  const [open, setOpen] = useState<SystemKey | null>(null);
+  const keys: SystemKey[] = ['data','automation','ai'];
+  const icons = { data: BarChart3, automation: Bot, ai: BrainCircuit };
+  const tag = (value:string) => language === 'pt' ? ptTags[value] || value : value;
 
-  // Helper icons for Projects
-  const getIcon = (i: number) => {
-    const icons = [Cpu, Activity, Database, GitBranch];
-    const Icon = icons[i % icons.length];
-    return <Icon className="w-5 h-5 text-stone-400 group-hover:text-purple-900 transition-colors" strokeWidth={1.5} />;
-  };
-
-  return (
-    <section id="projects" className="scroll-mt-28 md:scroll-mt-32 py-32 px-6 md:px-12 lg:px-24 relative overflow-hidden bg-stone-50/30">
-       
-       {/* Background: Digital Grid */}
-       <div className="absolute inset-0 opacity-[0.05] pointer-events-none">
-          <svg width="100%" height="100%">
-            <defs>
-                <pattern id="binaryGrid" width="60" height="60" patternUnits="userSpaceOnUse">
-                    <text x="10" y="20" fontSize="10" fill="black" opacity="0.5">0</text>
-                    <text x="40" y="50" fontSize="10" fill="black" opacity="0.5">1</text>
-                </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#binaryGrid)" />
-          </svg>
-       </div>
-
-      <div className="max-w-7xl mx-auto relative z-10">
-        <div className="flex items-end justify-between mb-16 border-b border-stone-200 pb-6">
-          <div>
-             <span className="font-mono text-xs text-purple-900/60 mb-2 block">{t(UI_TEXT.projects.section)}</span>
-            <h3 className="font-serif text-4xl md:text-5xl text-obsidian italic">
-              {t(UI_TEXT.projects.title)}
-            </h3>
-          </div>
-          <div className="hidden md:block text-right">
-            <p className="font-mono text-[10px] text-stone-400 uppercase tracking-widest">
-                {t(UI_TEXT.projects.interact)}
-            </p>
-          </div>
-        </div>
-
-        <div className="min-h-[400px]">
-            <motion.div className="grid md:grid-cols-2 xl:grid-cols-4 gap-5 items-start">
-                {PROJECTS.map((project, index) => {
-                    const subProject = (project as any).subProject;
-                    return (
-                        <div key={t(project.title)} className="flex flex-col gap-6">
-                            <TiltCard index={index}>
-                                <a 
-                                    href={project.url} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className="block h-full"
-                                >
-                                    <div className="bg-white border border-stone-200 h-[520px] flex flex-col justify-between relative transition-all duration-500 hover:border-purple-900/30 hover:shadow-2xl shadow-stone-200/50 rounded-lg transform-style-3d cursor-pointer overflow-hidden">
-                                        
-                                        {/* Tech Corner Brackets */}
-                                        <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-stone-400 group-hover:border-purple-900/50 transition-colors" />
-                                        <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-stone-400 group-hover:border-purple-900/50 transition-colors" />
-                                        <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-stone-400 group-hover:border-purple-900/50 transition-colors" />
-                                        <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-stone-400 group-hover:border-purple-900/50 transition-colors" />
-
-                                        {'image' in project && project.image && (
-                                            <div
-                                                className="relative z-10 h-36 overflow-hidden border-b border-stone-200 bg-stone-100"
-                                                style={{ transform: "translateZ(12px)" }}
-                                            >
-                                                <img 
-                                                    src={project.image} 
-                                                    alt={`${t(project.title)} preview`}
-                                                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
-                                                />
-                                                <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
-                                                <span className="absolute bottom-3 left-4 font-mono text-[10px] uppercase tracking-widest text-white/85">
-                                                    {project.category}
-                                                </span>
-                                            </div>
-                                        )}
-
-                                        {/* Card Content (Lifted slightly in Z-space) */}
-                                        <div className="relative z-10 p-5 flex-1" style={{ transform: "translateZ(20px)" }}>
-                                            <div className="flex justify-between items-start mb-4">
-                                                <div className="flex items-center gap-3">
-                                                    <span className="font-mono text-[10px] font-bold text-stone-400 border border-stone-200 px-1 rounded">
-                                                        SYS-{index}
-                                                    </span>
-                                                    {getIcon(index)}
-                                                </div>
-                                                <ArrowUpRight className="w-5 h-5 text-stone-300 group-hover:text-obsidian group-hover:translate-x-1 group-hover:-translate-y-1 transition-all duration-300" />
-                                            </div>
-                                            
-                                            <h4 className="font-serif text-xl leading-tight text-obsidian mb-2 group-hover:text-purple-900 transition-colors">
-                                                {t(project.title)}
-                                            </h4>
-                                            
-                                            <p className="font-sans text-[9px] font-bold tracking-widest text-stone-500 uppercase mb-3 min-h-[28px]">
-                                                {t(project.subtitle)}
-                                            </p>
-                                            
-                                            <p className="font-sans text-xs text-stone-600 leading-relaxed line-clamp-5">
-                                                {t(project.description)}
-                                            </p>
-                                        </div>
-
-                                        {/* Tags (Lifted less in Z-space) */}
-                                        <div className="relative z-10 p-5 pt-4 mt-0 border-t border-stone-100/50 flex flex-wrap gap-1.5 min-h-[86px]" style={{ transform: "translateZ(10px)" }}>
-                                            {project.tags.map((tag, i) => (
-                                                <span key={i} className="text-[9px] font-mono text-stone-400 bg-stone-50 px-1.5 py-0.5 rounded">
-                                                    {tag}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </a>
-                            </TiltCard>
-
-                            {subProject && (
-                                <>
-                                    {/* Visual Connector */}
-                                    <div className="flex flex-col items-center -my-3 relative z-20">
-                                        <div className="w-[1.5px] h-4 bg-gradient-to-b from-purple-900/30 to-purple-900/60 border-dashed border-l border-purple-900/40" />
-                                        <div className="bg-white text-purple-950 font-mono text-[9px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider border border-purple-900/20 shadow-sm flex items-center gap-1.5">
-                                            <span className="w-1.5 h-1.5 rounded-full bg-purple-900 animate-pulse" />
-                                            {t({ en: "DATA SOURCE", pt: "FONTE DE DADOS" })}
-                                        </div>
-                                        <div className="w-[1.5px] h-4 bg-gradient-to-b from-purple-900/60 to-purple-900/30 border-dashed border-l border-purple-900/40" />
-                                    </div>
-                                    
-                                    {/* Simpler connected card */}
-                                    {subProject.url ? (
-                                        <a 
-                                            href={subProject.url} 
-                                            target="_blank" 
-                                            rel="noopener noreferrer"
-                                            className="block bg-white/75 backdrop-blur-sm border border-stone-200/80 rounded-lg p-4 relative transition-all duration-300 hover:border-purple-900/30 hover:bg-white hover:shadow-xl group cursor-pointer"
-                                        >
-                                            {/* Tech Corner Brackets */}
-                                            <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-stone-300 group-hover:border-purple-900/30 transition-colors" />
-                                            <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-stone-300 group-hover:border-purple-900/30 transition-colors" />
-                                            <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-stone-300 group-hover:border-purple-900/30 transition-colors" />
-                                            <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-stone-300 group-hover:border-purple-900/30 transition-colors" />
-                                            
-                                            <div className="flex justify-between items-start mb-3">
-                                                <div className="flex items-center gap-3">
-                                                    <span className="font-mono text-[10px] font-bold text-stone-400 border border-stone-200 px-1 rounded">
-                                                        {subProject.code}
-                                                    </span>
-                                                    <Database className="w-4 h-4 text-stone-400 group-hover:text-purple-900 transition-colors" />
-                                                </div>
-                                                <ArrowUpRight className="w-4 h-4 text-stone-300 group-hover:text-obsidian group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-300" />
-                                            </div>
-                                            
-                                            <h4 className="font-serif text-base leading-tight text-obsidian mb-1 group-hover:text-purple-900 transition-colors">
-                                                {t(subProject.title)}
-                                            </h4>
-                                            
-                                            <p className="font-sans text-[8px] font-bold tracking-widest text-stone-500 uppercase mb-2">
-                                                {t(subProject.subtitle)}
-                                            </p>
-                                            
-                                            <p className="font-sans text-[11px] text-stone-600 leading-relaxed mb-3 line-clamp-4">
-                                                {t(subProject.description)}
-                                            </p>
-                                            
-                                            <div className="flex flex-wrap gap-1.5">
-                                                {subProject.tags.map((tag: string, i: number) => (
-                                                    <span key={i} className="text-[8px] font-mono text-stone-400 bg-stone-50 px-1.5 py-0.5 rounded border border-stone-100">
-                                                        {tag}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        </a>
-                                    ) : (
-                                        <div className="bg-white/75 backdrop-blur-sm border border-stone-200/80 rounded-lg p-6 relative transition-all duration-300 hover:border-purple-900/30 hover:bg-white hover:shadow-xl group">
-                                            {/* Tech Corner Brackets */}
-                                            <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-stone-300 group-hover:border-purple-900/30 transition-colors" />
-                                            <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-stone-300 group-hover:border-purple-900/30 transition-colors" />
-                                            <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-stone-300 group-hover:border-purple-900/30 transition-colors" />
-                                            <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-stone-300 group-hover:border-purple-900/30 transition-colors" />
-                                            
-                                            <div className="flex justify-between items-start mb-4">
-                                                <div className="flex items-center gap-3">
-                                                    <span className="font-mono text-[10px] font-bold text-stone-400 border border-stone-200 px-1 rounded">
-                                                        {subProject.code}
-                                                    </span>
-                                                    <Database className="w-4 h-4 text-stone-400 group-hover:text-purple-900 transition-colors" />
-                                                </div>
-                                            </div>
-                                            
-                                            <h4 className="font-serif text-lg text-obsidian mb-1 group-hover:text-purple-900 transition-colors">
-                                                {t(subProject.title)}
-                                            </h4>
-                                            
-                                            <p className="font-sans text-[9px] font-bold tracking-widest text-stone-500 uppercase mb-3">
-                                                {t(subProject.subtitle)}
-                                            </p>
-                                            
-                                            <p className="font-sans text-xs text-stone-600 leading-relaxed mb-4">
-                                                {t(subProject.description)}
-                                            </p>
-                                            
-                                            <div className="flex flex-wrap gap-1.5">
-                                                {subProject.tags.map((tag: string, i: number) => (
-                                                    <span key={i} className="text-[9px] font-mono text-stone-400 bg-stone-50 px-1.5 py-0.5 rounded border border-stone-100">
-                                                        {tag}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-                                </>
-                            )}
-                        </div>
-                    );
-                })}
-            </motion.div>
-        </div>
-
-        {/* Subsection: Generative AI & LLMs */}
-        <div className="mt-24 pt-16 border-t border-stone-200/50">
-          <div className="mb-10">
-             <span className="font-mono text-xs text-purple-900/60 mb-2 block">{t({ en: "02.1 / LAB", pt: "02.1 / LAB" })}</span>
-             <h4 className="font-serif text-2xl md:text-3xl text-obsidian italic">
-               {t({ en: "Generative AI & LLM Systems", pt: "Sistemas de IA Generativa & LLM" })}
-             </h4>
-          </div>
-
-          <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-5 items-start">
-             {GENAI_PROJECTS.map((project, index) => {
-                 const hasImage = 'image' in project && project.image;
-                 return (
-                     <TiltCard key={t(project.title)} index={index}>
-                         <a 
-                             href={project.url} 
-                             target="_blank" 
-                             rel="noopener noreferrer"
-                             className="block h-full"
-                         >
-                             <div className="bg-white border border-stone-200 h-[520px] flex flex-col justify-between relative transition-all duration-500 hover:border-purple-900/30 hover:shadow-2xl shadow-stone-200/50 rounded-lg transform-style-3d cursor-pointer overflow-hidden">
-                                 
-                                 {/* Tech Corner Brackets */}
-                                 <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-stone-400 group-hover:border-purple-900/50 transition-colors" />
-                                 <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-stone-400 group-hover:border-purple-900/50 transition-colors" />
-                                 <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-stone-400 group-hover:border-purple-900/50 transition-colors" />
-                                 <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-stone-400 group-hover:border-purple-900/50 transition-colors" />
-                                 
-                                 {hasImage && (
-                                     <div 
-                                         className="relative h-36 overflow-hidden border-b border-stone-200 bg-stone-100 w-full"
-                                         style={{ 
-                                             transform: "translateZ(12px)"
-                                         }}
-                                     >
-                                         <img 
-                                             src={project.image} 
-                                             alt={`${t(project.title)} preview`}
-                                             className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
-                                         />
-                                         <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
-                                         <span className="absolute bottom-3 left-4 font-mono text-[10px] uppercase tracking-widest text-white/85">
-                                             {(project as any).category}
-                                         </span>
-                                     </div>
-                                 )}
-
-                                 <div className="relative z-10 p-5 flex-1" style={{ transform: "translateZ(20px)" }}>
-                                     <div className="flex justify-between items-start mb-4">
-                                         <div className="flex items-center gap-3">
-                                             <span className="font-mono text-[10px] font-bold text-stone-400 border border-stone-200 px-1 rounded">
-                                                 {project.code}
-                                             </span>
-                                             <Brain className="w-4 h-4 text-stone-400 group-hover:text-purple-900 transition-colors" />
-                                         </div>
-                                         <ArrowUpRight className="w-5 h-5 text-stone-300 group-hover:text-obsidian group-hover:translate-x-1 group-hover:-translate-y-1 transition-all duration-300" />
-                                     </div>
-                                     
-                                     <h4 className="font-serif text-xl leading-tight text-obsidian mb-2 group-hover:text-purple-900 transition-colors">
-                                         {t(project.title)}
-                                     </h4>
-                                     
-                                     <p className="font-sans text-[9px] font-bold tracking-widest text-stone-500 uppercase mb-3 min-h-[28px]">
-                                         {t(project.subtitle)}
-                                     </p>
-                                     
-                                     <p className="font-sans text-xs text-stone-600 leading-relaxed line-clamp-5">
-                                         {t(project.description)}
-                                     </p>
-                                 </div>
-                                 
-                                 <div className="relative z-10 p-5 pt-4 mt-0 border-t border-stone-100/50 flex flex-wrap gap-1.5 min-h-[86px]" style={{ transform: "translateZ(10px)" }}>
-                                     {project.tags.map((tag: string, i: number) => (
-                                         <span key={i} className="text-[9px] font-mono text-stone-400 bg-stone-50 px-1.5 py-0.5 rounded">
-                                             {tag}
-                                         </span>
-                                     ))}
-                                 </div>
-                             </div>
-                         </a>
-                     </TiltCard>
-                 );
-             })}
-          </div>
-        </div>
+  return <section id="projects" className="scroll-mt-28 md:scroll-mt-32 py-28 px-6 md:px-12 lg:px-24 relative overflow-hidden bg-stone-50/70 border-y border-stone-200">
+    <div className="absolute inset-0 opacity-[0.04] pointer-events-none" style={{backgroundImage:'radial-gradient(#1c1917 1px, transparent 1px)',backgroundSize:'22px 22px'}}/>
+    <div className="max-w-7xl mx-auto relative z-10">
+      <header className="mb-14 flex items-end justify-between border-b border-stone-300 pb-5"><div><span className="font-mono text-xs text-purple-900/60">{t(UI_TEXT.projects.section)}</span><h3 className="font-serif text-4xl md:text-5xl text-obsidian mt-2">{t(UI_TEXT.projects.title)}</h3></div><span className="hidden md:block font-mono text-[10px] text-stone-400">{language==='pt'?'03 PILARES / ARQUITETURA HÍBRIDA':'03 PILLARS / HYBRID ARCHITECTURE'}</span></header>
+      <div className="flex flex-col lg:flex-row gap-4 items-stretch">
+        {keys.map((key,index) => { const system=systems[key]; const Icon=icons[key]; const expanded=open===key; return <motion.article key={key} layout="position" onHoverStart={()=>setHovered(key)} onHoverEnd={()=>setHovered(null)} animate={{flexGrow:hovered?(hovered===key?1.55:1):1}} transition={{type:'spring',stiffness:150,damping:24,mass:.8}} className={`min-w-0 lg:basis-0 border bg-white overflow-hidden transition-colors ${expanded?'border-purple-900/40 shadow-md':'border-stone-200'}`}>
+          <button type="button" onClick={()=>setOpen(expanded?null:key)} aria-expanded={expanded} className="w-full min-h-[390px] p-6 md:p-7 xl:p-8 text-left flex flex-col group">
+            <div className="flex items-center justify-between font-mono text-[10px] tracking-widest"><span className="text-purple-900/60">{system.code}</span><span className="flex items-center gap-2 text-green-600"><i className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"/>{t(system.status)}</span></div>
+            <div className="mt-10 flex items-center gap-3 text-stone-400"><Icon className="w-5 h-5" strokeWidth={1.4}/><span className="font-mono text-[10px]">0{index+1}</span></div>
+            <h4 className="font-sans text-2xl xl:text-3xl uppercase leading-[1.12] text-obsidian mt-4 max-w-sm break-words">{t(system.title)}</h4><p className="font-mono text-[9px] xl:text-[10px] uppercase leading-relaxed text-stone-400 mt-3 min-h-[30px]">{t(system.kicker)}</p><p className="font-serif text-base xl:text-lg text-stone-600 leading-relaxed mt-4 max-w-md">{t(system.description)}</p>
+            <div className="mt-auto pt-7"><SystemVisual type={key}/><div className="mt-7 pt-4 border-t border-stone-100 flex justify-between items-center font-mono text-[10px] uppercase tracking-widest"><span>{system.projects.length.toString().padStart(2,'0')} {language==='pt'?'projetos':'projects'}</span><span className="flex items-center gap-2 text-purple-900">{expanded?(language==='pt'?'Fechar':'Close'):(language==='pt'?'Explorar':'Explore')}<ChevronDown className={`w-4 h-4 transition-transform duration-300 ${expanded?'rotate-180':''}`}/></span></div></div>
+          </button>
+          <AnimatePresence initial={false}>{expanded && <motion.div initial={{height:0,opacity:0}} animate={{height:'auto',opacity:1}} exit={{height:0,opacity:0}} transition={{duration:.42,ease:[.22,1,.36,1]}} className="overflow-hidden"><div className="border-t border-stone-200 bg-stone-50 p-5 md:p-7 space-y-3">{system.projects.map((project,i)=><div key={t(project.title)} className={`group/project grid md:grid-cols-[1fr_1.2fr_auto] gap-4 items-center p-4 border border-stone-200 bg-white transition-all duration-300 ${project.url||project.repositoryUrl?'hover:border-purple-900/30 hover:translate-x-1':'cursor-default'}`}><div><span className="font-mono text-[9px] uppercase text-purple-900/60">{project.badge?t(project.badge):i===0?(language==='pt'?'Destaque':'Featured'):`${language==='pt'?'Projeto':'Project'} 0${i+1}`}</span><h5 className="font-serif text-xl text-stone-900 mt-1">{t(project.title)}</h5><p className="font-mono text-[9px] uppercase text-stone-400 mt-1">{t(project.subtitle)}</p></div><p className="text-xs text-stone-600 leading-relaxed">{t(project.description)}</p><div className="flex items-center justify-between md:justify-end gap-3"><div className="hidden xl:flex gap-1">{project.tags.slice(0,2).map(x=><span key={x} className="font-mono text-[8px] bg-stone-100 px-2 py-1 text-stone-500">{tag(x)}</span>)}</div>{project.repositoryUrl&&<a href={project.repositoryUrl} target="_blank" rel="noreferrer" aria-label={`GitHub: ${t(project.title)}`} className="text-stone-400 hover:text-purple-900"><Github className="w-4 h-4"/></a>}{project.url&&<a href={project.url} target="_blank" rel="noreferrer" aria-label={`${language==='pt'?'Abrir demonstração':'Open demo'}: ${t(project.title)}`} className="text-stone-400 hover:text-purple-900"><ArrowUpRight className="w-4 h-4"/></a>}</div></div>)}</div></motion.div>}</AnimatePresence>
+        </motion.article>})}
       </div>
-    </section>
-  );
+      <div className="mt-5 text-right"><a href={GENAI_PROJECTS.find(project=>project.title.en==='Big Bang Theory')?.url} target="_blank" rel="noreferrer" className="font-mono text-[10px] uppercase tracking-widest text-stone-400 hover:text-purple-900">{language==='pt'?'Experimentos / Código criativo':'Experiments / Creative coding'} <ArrowUpRight className="inline w-3 h-3"/></a></div>
+    </div>
+  </section>;
 };
 
 export default Projects;
