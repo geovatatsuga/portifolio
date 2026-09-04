@@ -5,7 +5,7 @@ import { SKILLS, UI_TEXT } from '../constants';
 import { useLanguage } from './LanguageContext';
 
 const Skills: React.FC = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const cardVariants = {
@@ -169,12 +169,12 @@ const Skills: React.FC = () => {
             </h3>
           </div>
           <div className="hidden md:flex gap-4 font-mono text-[10px] text-stone-400">
-             <span>SYS.STATUS: ONLINE</span>
+             <span>SYS.STATUS: {language === 'pt' ? 'OPERACIONAL' : 'ONLINE'}</span>
              <span>V.2.5.0</span>
           </div>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {SKILLS.map((skillGroup, index) => (
             <motion.div
               key={index}

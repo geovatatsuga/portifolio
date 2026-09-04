@@ -203,20 +203,10 @@ const NeuralNetworkCanvas: React.FC = () => {
 
 
 // --- Sub-component: Fluctuating System Stats (Bottom Right HUD) ---
-const LiveStats: React.FC = () => {
-  const [cpu, setCpu] = useState(25);
-  const [mem, setMem] = useState(4184);
-  const [bars, setBars] = useState<number[]>(Array(5).fill(0.2));
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCpu(prev => Math.min(99, Math.max(10, prev + Math.floor(Math.random() * 20) - 10)));
-      setMem(prev => Math.min(8192, Math.max(3000, prev + Math.floor(Math.random() * 300) - 150)));
-      setBars(Array.from({ length: 5 }).map(() => Math.random()));
-    }, 800);
-    return () => clearInterval(interval);
-  }, []);
-
+const LiveStats: React.FC<{ language: 'en' | 'pt' }> = ({ language }) => {
+  const rows = language === 'pt'
+    ? [['DADOS', 'ONLINE'], ['AUTOMAÇÃO', 'ATIVA'], ['IA', 'PRONTA']]
+    : [['DATA', 'ONLINE'], ['AUTOMATION', 'ACTIVE'], ['AI', 'READY']];
   return (
     <motion.div 
       initial={{ opacity: 0 }}
@@ -224,35 +214,15 @@ const LiveStats: React.FC = () => {
       transition={{ delay: 2 }}
       className="absolute bottom-8 right-6 md:right-12 flex flex-col items-end gap-3 font-mono text-[10px] text-stone-400 z-20 pointer-events-none"
     >
-      <div className="flex flex-col items-end">
-          <span className="text-stone-500 uppercase tracking-widest text-[9px] mb-0.5">CPU_LOAD</span>
-          <span className="text-obsidian font-bold text-lg leading-none">{cpu}%</span>
-      </div>
-      
-      <div className="w-8 h-[1px] bg-stone-300 my-1" />
-
-      <div className="flex flex-col items-end">
-          <span className="text-stone-500 uppercase tracking-widest text-[9px] mb-0.5">MEM_ALLOC</span>
-          <span className="text-obsidian font-bold text-lg leading-none">{mem}MB</span>
-      </div>
-
-      <div className="w-8 h-[1px] bg-stone-300 my-1" />
-
-      <div className="flex flex-col items-end">
-          <span className="text-stone-500 uppercase tracking-widest text-[9px] mb-0.5">NET_IO</span>
-          <div className="flex items-center gap-2">
-            <div className="flex gap-0.5 h-3 items-end">
-                {bars.map((h, i) => (
-                    <motion.div 
-                        key={i} 
-                        animate={{ height: `${20 + (h * 80)}%` }}
-                        className="w-1 bg-green-500/60" 
-                    />
-                ))}
-            </div>
-            <span className="text-green-600 font-bold tracking-wider">CONNECTED</span>
-          </div>
-      </div>
+      <span className="text-stone-500 uppercase tracking-widest text-[9px]">{language === 'pt' ? 'Modo do sistema: híbrido' : 'System mode: hybrid'}</span>
+      {rows.map(([label, status], index) => (
+        <motion.div key={label} className="flex items-center gap-4" animate={{ opacity: [0.55, 1, 0.55] }} transition={{ duration: 2.4, delay: index * .35, repeat: Infinity }}>
+          <span className="text-stone-500 w-20 text-right">{label}</span>
+          <span className="text-green-600 font-bold tracking-wider w-14">{status}</span>
+        </motion.div>
+      ))}
+      <div className="w-28 h-px bg-stone-300" />
+      <span className="text-obsidian font-bold tracking-wider">SYS.STATUS&nbsp; {language === 'pt' ? 'OPERACIONAL' : 'OPERATIONAL'}</span>
     </motion.div>
   );
 };
@@ -283,7 +253,7 @@ const DecryptingID: React.FC = () => {
 
 
 const Hero: React.FC = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   
   return (
     <section className="relative min-h-screen flex flex-col justify-center px-6 md:px-12 lg:px-24 overflow-hidden perspective-1000">
@@ -320,7 +290,7 @@ const Hero: React.FC = () => {
             transition={{ delay: 0.5, duration: 1 }}
             className="font-mono text-xs text-stone-500 uppercase tracking-widest flex items-center gap-2"
           >
-            Portfolio 2026 <span className="w-1 h-1 bg-green-500 rounded-full animate-pulse"/> {t(UI_TEXT.hero.active)}
+            {language === 'pt' ? 'Portfólio' : 'Portfolio'} 2026 <span className="w-1 h-1 bg-green-500 rounded-full animate-pulse"/> {t(UI_TEXT.hero.active)}
           </motion.span>
         </motion.div>
 
@@ -363,6 +333,10 @@ const Hero: React.FC = () => {
             <DecryptingID />
         </div>
 
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.1 }} className="font-mono text-xs md:text-sm text-purple-900/60 uppercase tracking-[0.28em] mb-7">
+          {language === 'pt' ? 'Dados • Automação • IA' : 'Data • Automation • AI'}
+        </motion.p>
+
         <motion.div 
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -394,7 +368,7 @@ const Hero: React.FC = () => {
       </div>
 
       {/* 4. Live Stats HUD (Fixed to Bottom Right) */}
-      <LiveStats />
+      <LiveStats language={language} />
 
       <motion.div 
         initial={{ opacity: 0 }}

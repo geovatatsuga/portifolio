@@ -5,7 +5,7 @@ import { PROFILE, UI_TEXT } from '../constants';
 import { useLanguage } from './LanguageContext';
 
 const About: React.FC = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   return (
     <section id="about" className="scroll-mt-28 md:scroll-mt-32 py-32 px-6 md:px-12 lg:px-24 bg-white/40 backdrop-blur-md border-b border-stone-200">
@@ -61,7 +61,7 @@ const About: React.FC = () => {
               <div className="grid grid-cols-2 md:grid-cols-3 gap-8 border-t border-stone-200 pt-8">
                 <div>
                     <h4 className="font-mono text-[10px] uppercase tracking-widest text-stone-400 mb-2">{t(UI_TEXT.about.focus)}</h4>
-                    <p className="font-serif text-lg text-stone-800">Data Analytics &<br/>Business Intelligence</p>
+                    <p className="font-serif text-lg text-stone-800">{language === 'pt' ? 'Análise de Dados' : 'Data Analytics'}<br/><span className="text-stone-400">×</span> {language === 'pt' ? 'Automação Inteligente' : 'Intelligent Automation'}</p>
                   </div>
                 <div>
                   <h4 className="font-mono text-[10px] uppercase tracking-widest text-stone-400 mb-2">{t(UI_TEXT.about.based)}</h4>
@@ -69,7 +69,7 @@ const About: React.FC = () => {
                 </div>
                 <div>
                    <h4 className="font-mono text-[10px] uppercase tracking-widest text-stone-400 mb-2">{t(UI_TEXT.about.exp)}</h4>
-                   <p className="font-serif text-lg text-stone-800">{t(UI_TEXT.about.years)}<br/><span className="text-sm italic text-stone-500 text-xs">Across Industries</span></p>
+                   <p className="font-serif text-lg text-stone-800">{t(UI_TEXT.about.years)}<br/><span className="text-sm italic text-stone-500 text-xs">{language === 'pt' ? 'Em diferentes setores' : 'Across industries'}</span></p>
                 </div>
               </div>
             </div>

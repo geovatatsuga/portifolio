@@ -57,12 +57,12 @@ const Navbar: React.FC = () => {
     >
       <div className={`
         pointer-events-auto
-        flex items-center gap-4 md:gap-8 px-6 py-3 md:px-8 md:py-4 rounded-full
+        flex items-center gap-3 md:gap-8 px-4 py-3 md:px-8 md:py-4 rounded-full max-w-[calc(100vw-24px)]
         transition-all duration-500
         ${isScrolled ? 'bg-white/80 backdrop-blur-md shadow-sm border border-stone-100' : 'bg-transparent'}
       `}>
         {/* Links */}
-        <div className="flex items-center gap-4 md:gap-8">
+        <div className="hidden sm:flex items-center gap-4 md:gap-8">
             {navLinks.map((link) => (
               <a
                 key={link.href}
@@ -75,7 +75,7 @@ const Navbar: React.FC = () => {
         </div>
 
         {/* Divider */}
-        <div className="w-px h-4 bg-stone-300 mx-2" />
+        <div className="hidden sm:block w-px h-4 bg-stone-300 mx-2" />
 
         {/* Language Switcher */}
         <button 
