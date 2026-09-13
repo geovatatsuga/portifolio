@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FraudRisk — Operações Antifraude</title>
+<meta name="description" content="Protótipo operacional para monitoramento e investigação de fraude.">
+<script src="https://cdn.jsdelivr.net/npm/echarts@6.1.0/dist/echarts.min.js"></script>
+<style>
+:root{
+ --bg:#f6f8fc;--card:#fff;--ink:#0b1f55;--text:#243d72;--muted:#7085ac;--muted2:#98a7c0;
+ --line:#e4eaf3;--line2:#d6dfec;--yellow:#f6b900;--yellowSoft:#fff3c9;--red:#f25561;--redSoft:#ffe8ea;
+ --blue:#3f82e5;--blueSoft:#eaf2ff;--green:#1aaa70;--greenSoft:#e7f7ef;--amber:#ec8d00;--amberSoft:#fff0d7;
+ --violet:#806ed7;--shadow:0 8px 26px rgba(22,48,91,.055);--shadowLg:0 20px 56px rgba(22,48,91,.12);
+ --r:14px;--side:220px
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+button,input,select{font:inherit}button{cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid rgba(63,130,229,.42);outline-offset:2px}
+.app{min-height:100vh;display:grid;grid-template-columns:var(--side) 1fr}
+.sidebar{position:fixed;inset:0 auto 0 0;width:var(--side);z-index:50;background:#fbfcfe;border-right:1px solid var(--line);padding:22px 10px 16px;display:flex;flex-direction:column}
+.brand{display:flex;align-items:center;gap:11px;padding:0 13px 27px}.brand svg{width:36px;height:36px;stroke-width:1.8}
+.brand strong{display:block;font-size:22px;letter-spacing:-.04em}.brand span{display:block;color:var(--muted);font-size:10.5px;margin-top:2px}
+.nav{display:flex;flex-direction:column;gap:5px}.nav button{height:47px;border:0;background:transparent;color:var(--ink);border-radius:10px;display:flex;align-items:center;gap:12px;padding:0 15px;font-size:13px;position:relative;text-align:left}
+.nav button svg{width:20px;height:20px;stroke-width:1.8}.nav button:hover{background:#f3f6fb}.nav button.active{background:linear-gradient(90deg,#fff7dd,#ffedb0);font-weight:800}
+.nav button.active:before{content:"";position:absolute;left:-10px;top:7px;bottom:7px;width:3px;background:#efa900;border-radius:0 5px 5px 0}
+.env{margin-top:auto;border-top:1px solid var(--line);padding:14px 13px 0;color:var(--muted);font-size:10px}.env b{display:block;color:var(--text);font-size:11px;margin-bottom:3px}
+.main{grid-column:2;min-width:0;padding:20px 25px 34px}
+.topbar{height:70px;display:flex;justify-content:space-between;align-items:flex-start;gap:18px;margin-bottom:12px}
+.title h1{margin:0;font-size:33px;letter-spacing:-.045em;line-height:1}.title p{margin:8px 0 0;color:#6179a5;font-size:13px}
+.userbar{display:flex;align-items:center;gap:12px}
+.periodWrap{position:relative}.period{height:40px;border:1px solid var(--line2);border-radius:9px;background:#fff;color:var(--text);padding:0 12px;display:flex;align-items:center;gap:8px;font-size:11px;box-shadow:0 2px 10px rgba(24,54,100,.03)}
+.period svg{width:16px;height:16px}
+.datePop{position:absolute;right:0;top:47px;width:330px;z-index:80;background:#fff;border:1px solid var(--line2);border-radius:12px;box-shadow:var(--shadowLg);padding:13px;display:none}
+.datePop.open{display:block}.dateGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.dateGrid label{display:block;font-size:10px;color:var(--muted);margin-bottom:5px}
+.dateGrid input{width:100%;height:35px;border:1px solid var(--line2);border-radius:8px;padding:0 8px;color:var(--text);background:#fff;font-size:11px}
+.dateActions{display:flex;gap:8px;margin-top:11px}.dateActions button{height:35px;border-radius:8px;font-size:10.5px;font-weight:800;padding:0 11px}.secondary{border:1px solid var(--line2);background:#fff;color:var(--text)}.primary{border:1px solid #3478d6;background:#3f82e5;color:#fff;flex:1}
+.avatar{width:39px;height:39px;border-radius:50%;background:#dce5f2;display:grid;place-items:center;font-size:11px;font-weight:850}
+.user{display:flex;align-items:center;gap:9px;padding-left:12px;border-left:1px solid var(--line2)}.user b{display:block;font-size:11px}.user span{display:block;font-size:9.5px;color:var(--muted);margin-top:2px}
+.page{display:none}.page.active{display:block;animation:fade .14s ease}@keyframes fade{from{opacity:.3;transform:translateY(3px)}to{opacity:1;transform:none}}
+.grid{display:grid;gap:14px}.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);min-width:0;overflow:hidden}
+.kpis{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:14px}.kpis.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.kpi{min-height:126px;padding:17px 19px;display:grid;grid-template-columns:52px 1fr;gap:12px;align-items:start}
+.kIcon{width:52px;height:52px;border-radius:12px;display:grid;place-items:center}.kIcon svg{width:27px;height:27px;stroke-width:1.8}
+.kIcon.blue{background:var(--blueSoft);color:var(--blue)}.kIcon.red{background:var(--redSoft);color:var(--red)}.kIcon.yellow{background:var(--yellowSoft);color:#e09c00}.kIcon.green{background:var(--greenSoft);color:var(--green)}.kIcon.amber{background:var(--amberSoft);color:var(--amber)}
+.kLabel{font-size:12px;color:var(--text);margin-top:2px}.kValue{font-size:31px;font-weight:860;letter-spacing:-.04em;margin-top:4px;font-variant-numeric:tabular-nums}
+.kMeta{grid-column:1/-1;color:var(--muted);font-size:10.5px;margin-top:-1px}
+.cardHead{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;padding:17px 19px 8px}.cardHead h2{margin:0;font-size:17px;letter-spacing:-.02em}.cardHead p{margin:4px 0 0;color:var(--muted);font-size:10.5px}
+.toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.select,.search{height:36px;border:1px solid var(--line2);border-radius:8px;background:#fff;color:var(--text);padding:0 10px;font-size:10.5px}
+.search{min-width:220px}.segment{display:flex;border:1px solid var(--line2);border-radius:9px;overflow:hidden;background:#fff}.segment button{border:0;border-right:1px solid var(--line2);height:34px;padding:0 12px;background:#fff;color:var(--text);font-size:10.5px}.segment button:last-child{border-right:0}.segment button.active{background:#fff2c8;font-weight:800}
+.linkBtn{border:0;background:transparent;color:var(--blue);font-size:10.5px;font-weight:800}
+.chart{width:100%;height:360px}.chart.short{height:300px}.chart.tall{height:390px}
+.chartPad{padding:0 9px 8px}
+.overMain{grid-template-columns:minmax(0,1.62fr) minmax(310px,.68fr)}.two{grid-template-columns:1fr 1fr}.txSecond{grid-template-columns:minmax(0,1.12fr) minmax(0,.88fr)}
+.statList{padding:4px 17px 16px}.statRow{display:grid;grid-template-columns:36px 1fr auto;gap:10px;align-items:center;padding:11px 0;border-bottom:1px solid #edf1f6}.statRow:last-child{border-bottom:0}
+.statIcon{width:34px;height:34px;border-radius:9px;background:#f1f5fb;color:var(--text);display:grid;place-items:center;font-size:12px}.statRow span{display:block;color:var(--muted);font-size:10px}.statRow strong{display:block;font-size:12px;margin-top:2px}.statNum{text-align:right;font-size:17px;font-weight:850;font-variant-numeric:tabular-nums}.statNum small{display:block;color:var(--muted);font-weight:500;font-size:9.5px;margin-top:2px}
+.tableWrap{padding:0 12px 13px;overflow:auto}table{width:100%;border-collapse:collapse;font-size:10.5px}th{height:33px;text-align:left;color:#5972a0;font-weight:700;border-bottom:1px solid var(--line2);white-space:nowrap}td{height:38px;border-bottom:1px solid #edf1f6;color:#183467;white-space:nowrap}tbody tr:last-child td{border-bottom:0}tbody.clickable tr{cursor:pointer}tbody.clickable tr:hover,tbody.clickable tr.selected{background:#fff8e5}
+.badge{display:inline-flex;padding:5px 7px;border-radius:7px;font-size:9.5px;font-weight:800}.badge.pending{background:#fff0c4;color:#986900}.badge.review{background:#e8f1ff;color:#2671cf}.badge.ok{background:#e6f7ef;color:#087b50}.badge.late{background:#ffe5e6;color:#c22e3b}
+.score{display:inline-flex;min-width:32px;justify-content:center;padding:5px 7px;border-radius:7px;background:#ffe6e7;color:#c9303d;font-weight:800}
+.filters{display:grid;grid-template-columns:repeat(4,minmax(120px,.68fr)) minmax(240px,1.35fr);gap:9px;margin-bottom:14px}.filterbox{background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 10px}.filterbox label{display:block;font-size:9.5px;color:#6179a5;margin-bottom:4px}.filterbox select,.filterbox input{width:100%;height:30px;border:1px solid var(--line2);border-radius:7px;background:#fff;color:var(--text);padding:0 8px;font-size:10.5px}
+.alertLayout{grid-template-columns:minmax(0,1.58fr) 410px}.detail{padding:16px 17px}.detailTop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.detailTop h2{margin:0;font-size:17px}.detailTop p{margin:4px 0 0;color:var(--muted);font-size:10px}.route{margin-top:13px;padding:10px;border:1px solid var(--line);border-radius:9px;background:#fbfdff;font-size:11.5px;font-weight:750}.route small{display:block;color:var(--muted);font-size:9.5px;font-weight:500;margin-top:3px}.amount{font-size:23px;font-weight:850;letter-spacing:-.025em;margin:14px 0 9px}
+.detailGrid{display:grid;grid-template-columns:1fr 1fr;gap:0 17px}.kv{padding:8px 0;border-bottom:1px solid #edf1f6}.kv span{display:block;font-size:9.5px;color:var(--muted)}.kv strong{display:block;font-size:11.5px;margin-top:3px}
+.actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-top:15px}.actions button{height:43px;border-radius:8px;border:1px solid var(--line2);font-size:10px;font-weight:800;background:#fff}.actions .fraud{background:#fff0f1;color:#c9323f;border-color:#ffc2c7}.actions .release{background:#eaf8f1;color:#087c50;border-color:#c4ead7}.actions .escalate{background:#eaf2ff;color:#2167c3;border-color:#cbdcf6}
+.modelTop{grid-template-columns:minmax(300px,.78fr) minmax(0,1.42fr);margin-bottom:14px}.prodCard{padding:18px}.prodTop{display:flex;align-items:center;gap:11px}.prodIcon{width:48px;height:48px;border-radius:11px;background:var(--blueSoft);display:grid;place-items:center;color:var(--blue);font-size:20px}.prodTitle small{display:block;font-size:9.5px;color:var(--muted);font-weight:800;letter-spacing:.06em}.prodTitle strong{display:block;font-size:20px;margin-top:2px}.healthy{margin-left:auto;display:inline-flex;align-items:center;gap:6px;padding:6px 8px;border-radius:999px;background:var(--greenSoft);color:var(--green);font-size:9.5px;font-weight:800}.healthy i{width:7px;height:7px;background:var(--green);border-radius:50%}
+.prodGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:15px}.prodGrid div{border:1px solid var(--line);border-radius:9px;padding:10px}.prodGrid span{display:block;color:var(--muted);font-size:9.5px}.prodGrid strong{display:block;font-size:13px;margin-top:3px}.techBtn{width:100%;height:36px;border:1px solid #c8d9f1;background:#f5f9ff;color:#2a65af;border-radius:8px;margin-top:11px;font-size:10.5px;font-weight:800}
+.modelMetrics{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;padding:0 17px 16px}.mcard{border:1px solid var(--line);border-radius:10px;padding:12px}.mcard span{display:block;color:var(--muted);font-size:9.5px}.mcard strong{display:block;font-size:25px;letter-spacing:-.035em;margin-top:4px}.mcard small{display:block;color:var(--muted);font-size:9px;margin-top:3px}.mcard.big{grid-column:span 2}
+.modalBack{position:fixed;inset:0;z-index:100;background:rgba(9,28,65,.30);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:20px}.modalBack.open{display:flex}.modal{width:min(1040px,95vw);max-height:90vh;overflow:auto;background:#fff;border:1px solid var(--line);border-radius:15px;box-shadow:var(--shadowLg)}.modalHead{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;padding:17px 19px 11px;border-bottom:1px solid var(--line)}.modalHead h2{margin:0;font-size:18px}.modalHead p{margin:4px 0 0;color:var(--muted);font-size:10.5px}.modalHead button{border:0;background:transparent;color:var(--muted);font-size:23px}.modalBody{padding:12px 14px 16px}.modalCharts{grid-template-columns:1.25fr .75fr}
+.loading{height:100%;display:grid;place-items:center;color:var(--muted);font-size:12px}
+@media(max-width:1200px){:root{--side:188px}.overMain,.two,.txSecond,.alertLayout,.modelTop,.modalCharts{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}.filters{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:760px){:root{--side:68px}.brand div,.nav span,.env,.user div:last-child{display:none}.brand{padding-left:7px}.nav button{justify-content:center;padding:0}.main{padding:16px 10px 24px}.periodWrap{display:none}.title h1{font-size:28px}.kpis,.kpis.three{grid-template-columns:1fr}.filters{grid-template-columns:1fr}.alertLayout{grid-template-columns:1fr}.detailGrid{grid-template-columns:1fr}.actions{grid-template-columns:1fr}.modelMetrics{grid-template-columns:1fr}.mcard.big{grid-column:auto}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+ <div class="brand">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3l7 3v5c0 4.8-2.8 8.2-7 10-4.2-1.8-7-5.2-7-10V6l7-3z"/><path d="M9 12l2 2 4-5"/></svg>
+  <div><strong>FraudRisk</strong><span>Inteligência contra fraudes</span></div>
+ </div>
+ <nav class="nav">
+  <button class="active" data-page="overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span>Visão Geral</span></button>
+  <button data-page="transactions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 7h14"/><path d="M4 7l3-3M4 7l3 3"/><path d="M20 17H6"/><path d="M20 17l-3-3M20 17l-3 3"/></svg><span>Transações</span></button>
+  <button data-page="alerts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3l10 18H2L12 3z"/><path d="M12 9v5M12 18h.01"/></svg><span>Alertas</span></button>
+  <button data-page="models"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 20V10M12 20V4M19 20v-7"/></svg><span>Modelos</span></button>
+ </nav>
+ <div class="env"><b>Base PaySim</b>Março 2024 · Gold</div>
+</aside>
+
+<main class="main">
+<header class="topbar">
+ <div class="title"><h1 id="pageTitle">Visão Geral</h1><p id="pageSub">Fraude, exposição e operação</p></div>
+ <div class="userbar">
+  <div class="periodWrap">
+   <button class="period" id="periodBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg><span id="periodLabel">01/03/2024 — 31/03/2024</span><span>⌄</span></button>
+   <div class="datePop" id="datePop">
+    <div class="dateGrid"><div><label>Data inicial</label><input type="date" id="dateFrom" min="2024-03-01" max="2024-03-31" value="2024-03-01"></div><div><label>Data final</label><input type="date" id="dateTo" min="2024-03-01" max="2024-03-31" value="2024-03-31"></div></div>
+    <div class="dateActions"><button class="secondary" id="dateReset">Período completo</button><button class="primary" id="dateApply">Aplicar</button></div>
+   </div>
+  </div>
+  <div class="user"><div class="avatar">AS</div><div><b>Ana Silva</b><span>Analista de Risco</span></div></div>
+ </div>
+</header>
+
+<section id="overview" class="page active">
+ <div class="grid kpis">
+  <article class="card kpi"><div class="kIcon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h4"/></svg></div><div><div class="kLabel">Transações</div><div class="kValue" id="ovTx">6,36M</div></div><div class="kMeta">Universo monitorado</div></article>
+  <article class="card kpi"><div class="kIcon red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3l10 18H2L12 3z"/><path d="M12 9v5M12 18h.01"/></svg></div><div><div class="kLabel">Fraudes</div><div class="kValue" id="ovFraud">8.213</div></div><div class="kMeta">Transações fraudulentas</div></article>
+  <article class="card kpi"><div class="kIcon yellow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="8" cy="8" r="2.5"/><circle cx="16" cy="16" r="2.5"/><path d="M17.5 6.5l-11 11"/></svg></div><div><div class="kLabel">Taxa de fraude</div><div class="kValue" id="ovRate">0,1291%</div></div><div class="kMeta">Fraudes ÷ transações</div></article>
+  <article class="card kpi"><div class="kIcon amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/></svg></div><div><div class="kLabel">Exposição fraudulenta</div><div class="kValue" id="ovExposure">R$ 12,06B</div></div><div class="kMeta">Valor associado às fraudes</div></article>
+ </div>
+
+ <div class="grid overMain">
+  <article class="card">
+   <div class="cardHead"><div><h2>Atividade de fraude</h2><p>Volume e taxa no período selecionado</p></div><div class="toolbar"><span class="badge review">Arraste para ampliar</span></div></div>
+   <div class="chartPad"><div id="overviewChart" class="chart"></div></div>
+  </article>
+  <article class="card">
+   <div class="cardHead"><div><h2>Operação</h2><p>Fila atual</p></div><button class="linkBtn" data-jump="alerts">Abrir alertas</button></div>
+   <div class="statList">
+    <div class="statRow"><div class="statIcon">!</div><div><span>Alertas abertos</span><strong>Em fila</strong></div><div class="statNum">184<small>21 fora do SLA</small></div></div>
+    <div class="statRow"><div class="statIcon">✓</div><div><span>Confirmados</span><strong>Decisão concluída</strong></div><div class="statNum">47<small>25,5% dos analisados</small></div></div>
+    <div class="statRow"><div class="statIcon">×</div><div><span>Falso positivo</span><strong>Taxa operacional</strong></div><div class="statNum">12%</div></div>
+    <div class="statRow"><div class="statIcon">⏱</div><div><span>Tempo médio</span><strong>Até decisão</strong></div><div class="statNum">18 min<small>P95 · 1h42</small></div></div>
+   </div>
+  </article>
+ </div>
+
+ <div class="grid two" style="margin-top:14px">
+  <article class="card"><div class="cardHead"><div><h2>Risco por tipo</h2><p>Taxa de fraude por modalidade</p></div></div><div class="chartPad"><div id="typeRiskChart" class="chart short"></div></div></article>
+  <article class="card"><div class="cardHead"><div><h2>Concentração de risco</h2><p>Volume × taxa de fraude · tamanho = fraudes</p></div></div><div class="chartPad"><div id="typeBubbleChart" class="chart short"></div></div></article>
+ </div>
+</section>
+
+<section id="transactions" class="page">
+ <div class="grid kpis three">
+  <article class="card kpi"><div class="kIcon blue">⇄</div><div><div class="kLabel">Transações</div><div class="kValue" id="txKpi">6,36M</div></div><div class="kMeta">Período selecionado</div></article>
+  <article class="card kpi"><div class="kIcon yellow">R$</div><div><div class="kLabel">Valor processado</div><div class="kValue" id="valueKpi">R$ 1,14T</div></div><div class="kMeta">Estimado no recorte temporal</div></article>
+  <article class="card kpi"><div class="kIcon red">!</div><div><div class="kLabel">Fraudes</div><div class="kValue" id="fraudKpi">8.213</div></div><div class="kMeta">Período selecionado</div></article>
+ </div>
+ <article class="card">
+  <div class="cardHead"><div><h2>Atividade transacional</h2><p>Explore por métrica e tipo</p></div><div class="toolbar"><div class="segment" id="txMetric"><button class="active" data-metric="volume">Volume</button><button data-metric="fraudes">Fraudes</button><button data-metric="taxa">Taxa</button></div><select class="select" id="txType"><option>Todos os tipos</option><option>TRANSFER</option><option>CASH_OUT</option><option>CASH_IN</option><option>PAYMENT</option><option>DEBIT</option></select></div></div>
+  <div class="chartPad"><div id="transactionChart" class="chart tall"></div></div>
+ </article>
+ <div class="grid txSecond" style="margin-top:14px">
+  <article class="card"><div class="cardHead"><div><h2>Risco por faixa de valor</h2><p>Taxa de fraude por faixa</p></div></div><div class="chartPad"><div id="amountRiskChart" class="chart short"></div></div></article>
+  <article class="card"><div class="cardHead"><div><h2>Distribuição por tipo</h2><p>Volume, fraude e taxa</p></div></div><div class="tableWrap"><table><thead><tr><th>Tipo</th><th>Transações</th><th>Fraudes</th><th>Taxa</th></tr></thead><tbody class="clickable" id="txTypeRows">
+   <tr data-type="TRANSFER"><td><b>TRANSFER</b></td><td>532.909</td><td>4.097</td><td><b style="color:var(--red)">0,7688%</b></td></tr>
+   <tr data-type="CASH_OUT"><td><b>CASH_OUT</b></td><td>2.237.500</td><td>4.116</td><td><b style="color:var(--red)">0,1840%</b></td></tr>
+   <tr data-type="CASH_IN"><td><b>CASH_IN</b></td><td>1.399.284</td><td>0</td><td>0,0000%</td></tr>
+   <tr data-type="PAYMENT"><td><b>PAYMENT</b></td><td>2.151.495</td><td>0</td><td>0,0000%</td></tr>
+   <tr data-type="DEBIT"><td><b>DEBIT</b></td><td>41.432</td><td>0</td><td>0,0000%</td></tr>
+  </tbody></table></div></article>
+ </div>
+</section>
+
+<section id="alerts" class="page">
+ <div class="grid kpis">
+  <article class="card kpi"><div class="kIcon red">!</div><div><div class="kLabel">Alertas abertos</div><div class="kValue">184</div></div><div class="kMeta">Fila atual</div></article>
+  <article class="card kpi"><div class="kIcon amber">⏱</div><div><div class="kLabel">Fora do SLA</div><div class="kValue">21</div></div><div class="kMeta">11,4% da fila</div></article>
+  <article class="card kpi"><div class="kIcon green">✓</div><div><div class="kLabel">Confirmados</div><div class="kValue">47</div></div><div class="kMeta">Decisão como fraude</div></article>
+  <article class="card kpi"><div class="kIcon red">×</div><div><div class="kLabel">Falso positivo</div><div class="kValue">12%</div></div><div class="kMeta">Taxa operacional</div></article>
+ </div>
+ <div class="filters">
+  <div class="filterbox"><label>Tipo</label><select id="fType"><option value="">Todos</option><option>TRANSFER</option><option>CASH_OUT</option><option>PAYMENT</option></select></div>
+  <div class="filterbox"><label>Valor</label><select id="fValue"><option value="">Qualquer valor</option><option value="1000000">Acima de R$ 1M</option><option value="5000000">Acima de R$ 5M</option></select></div>
+  <div class="filterbox"><label>Status</label><select id="fStatus"><option value="">Todos</option><option>Pendente</option><option>Em análise</option><option>Confirmado</option></select></div>
+  <div class="filterbox"><label>SLA</label><select id="fSla"><option value="">Todos</option><option>Atrasado</option><option>No prazo</option></select></div>
+  <div class="filterbox"><label>Buscar</label><input id="fSearch" placeholder="Origem, destino ou analista"></div>
+ </div>
+ <div class="grid alertLayout">
+  <article class="card">
+   <div class="cardHead"><div><h2>Fila prioritária</h2><p id="alertCount">Alertas no período selecionado</p></div></div>
+   <div class="tableWrap"><table><thead><tr><th>Origem</th><th>Destino</th><th>Tipo</th><th>Data / hora</th><th>Valor</th><th>Pontuação</th><th>Status</th><th>Analista</th><th>SLA</th></tr></thead><tbody id="alertsBody" class="clickable"></tbody></table></div>
+  </article>
+  <aside class="card detail">
+   <div class="detailTop"><div><h2>Detalhes da transação</h2><p id="dId">AL-10482</p></div><span id="dSla" class="badge late">Atrasado</span></div>
+   <div class="route" id="dRoute">C7162498 → C945327594<small>TRANSFER · 01/03/2024 03:00</small></div>
+   <div class="amount" id="dAmount">R$ 10.000.000</div>
+   <div class="detailGrid">
+    <div class="kv"><span>Saldo anterior</span><strong id="dOld">R$ 12.930.418,44</strong></div><div class="kv"><span>Saldo após</span><strong id="dNew">R$ 2.930.418,44</strong></div>
+    <div class="kv"><span>Regra acionada</span><strong id="dRule">TRANSFER de alto valor</strong></div><div class="kv"><span>Pontuação</span><strong id="dScore">96 / 100</strong></div>
+    <div class="kv"><span>Status</span><strong id="dStatus">Pendente</strong></div><div class="kv"><span>Responsável</span><strong id="dAnalyst">Ana Silva</strong></div>
+   </div>
+   <div class="actions"><button class="fraud">Confirmar fraude</button><button class="release">Liberar</button><button class="escalate">Escalar</button></div>
+  </aside>
+ </div>
+</section>
+
+<section id="models" class="page">
+ <div class="grid modelTop">
+  <article class="card prodCard">
+   <div class="prodTop"><div class="prodIcon">◆</div><div class="prodTitle"><small>MODELO EM PRODUÇÃO</small><strong>Floresta Aleatória</strong></div><span class="healthy"><i></i>Saudável</span></div>
+   <div class="prodGrid"><div><span>Versão</span><strong>RF-24.04</strong></div><div><span>Limiar</span><strong>0,82</strong></div><div><span>Base avaliada</span><strong>6,36M transações</strong></div><div><span>Última avaliação</span><strong>31/03/2024</strong></div></div>
+   <button class="techBtn" id="openTech">Ver avaliação técnica</button>
+  </article>
+  <article class="card">
+   <div class="cardHead"><div><h2>Desempenho em produção</h2><p>Detecção financeira e qualidade da classificação</p></div></div>
+   <div class="modelMetrics">
+    <div class="mcard big"><span>Cobertura financeira</span><strong>99,94%</strong><small>valor fraudulento detectado</small></div>
+    <div class="mcard"><span>Ganho com variáveis</span><strong>+R$ 73,2M</strong><small>Floresta Aleatória</small></div>
+    <div class="mcard"><span>Recall</span><strong>91%</strong><small>fraudes capturadas</small></div>
+    <div class="mcard"><span>Precisão</span><strong>41%</strong><small>alertas confirmados</small></div>
+    <div class="mcard"><span>Falso positivo</span><strong>12%</strong><small>taxa operacional</small></div>
+   </div>
+  </article>
+ </div>
+ <div class="grid two">
+  <article class="card"><div class="cardHead"><div><h2>Saúde do modelo</h2><p>Qualidade dos dados e desvio no mês</p></div></div><div class="chartPad"><div id="modelHealthChart" class="chart short"></div></div></article>
+  <article class="card"><div class="cardHead"><div><h2>Impacto operacional</h2><p>Indicadores da operação atual</p></div></div><div class="statList">
+   <div class="statRow"><div class="statIcon">!</div><div><span>Alertas gerados</span><strong>Volume encaminhado</strong></div><div class="statNum">12.440</div></div>
+   <div class="statRow"><div class="statIcon">⌛</div><div><span>Alertas abertos</span><strong>Fila atual</strong></div><div class="statNum">184</div></div>
+   <div class="statRow"><div class="statIcon">⏱</div><div><span>Fora do SLA</span><strong>Acima do prazo</strong></div><div class="statNum" style="color:var(--red)">21</div></div>
+   <div class="statRow"><div class="statIcon">✓</div><div><span>Qualidade dos dados</span><strong>Sem bloqueios críticos</strong></div><div class="statNum" style="color:var(--green)">99,8%</div></div>
+  </div></article>
+ </div>
+</section>
+</main>
+</div>
+
+<div class="modalBack" id="techModal">
+ <div class="modal">
+  <div class="modalHead"><div><h2>Avaliação técnica dos modelos</h2><p>Comparação de cobertura financeira e ganho adicional</p></div><button id="closeTech">×</button></div>
+  <div class="modalBody"><div class="grid modalCharts"><div id="modelCompareChart" class="chart"></div><div id="modelGainChart" class="chart"></div></div></div>
+ </div>
+</div>
+
+<script>
+const RAW={
+ dates:['2024-03-01', '2024-03-02', '2024-03-03', '2024-03-04', '2024-03-05', '2024-03-06', '2024-03-07', '2024-03-08', '2024-03-09', '2024-03-10', '2024-03-11', '2024-03-12', '2024-03-13', '2024-03-14', '2024-03-15', '2024-03-16', '2024-03-17', '2024-03-18', '2024-03-19', '2024-03-20', '2024-03-21', '2024-03-22', '2024-03-23', '2024-03-24', '2024-03-25', '2024-03-26', '2024-03-27', '2024-03-28', '2024-03-29', '2024-03-30', '2024-03-31'],
+ vol:[188730, 196761, 204792, 212824, 200777, 192746, 184715, 216839, 208808, 198769, 206800, 202785, 200777, 212823, 204792, 216839, 208808, 220855, 204792, 198769, 210816, 200777, 206800, 224870, 230893, 216839, 212824, 202785, 194754, 190738, 186723],
+ fraud:[203, 223, 238, 263, 239, 220, 205, 276, 256, 234, 260, 247, 241, 278, 255, 295, 270, 313, 259, 244, 281, 252, 266, 315, 334, 297, 300, 301, 301, 280, 267],
+ rate:[0.1076, 0.1133, 0.1162, 0.1236, 0.119, 0.1141, 0.111, 0.1273, 0.1226, 0.1177, 0.1257, 0.1218, 0.12, 0.1306, 0.1245, 0.136, 0.1293, 0.1417, 0.1265, 0.1228, 0.1333, 0.1255, 0.1286, 0.1401, 0.1447, 0.137, 0.141, 0.1484, 0.1546, 0.1468, 0.143],
+ exposure:[236130155.64, 273804999.85, 338362751.76, 407896426.49, 308894949.09, 261591371.11, 233157526.42, 410222831.97, 337483887.47, 302432711.66, 352838163.6, 344773291.29, 305250247.18, 409602457.17, 362531519.74, 476590010.36, 390836119.68, 517806160.68, 354828532.73, 315357186.51, 428549737.31, 335467669.39, 371294313.7, 496687568.76, 582764571.31, 452951145.84, 465281094.86, 513515235.02, 564088705.14, 474069737.76, 431354348.36]
+};
+const TOTAL_PROCESSED=1144392944759.779;
+const META={
+ overview:["Visão Geral","Fraude, exposição e operação"],
+ transactions:["Transações","Volume, fraude e distribuição de risco"],
+ alerts:["Alertas","Transações que requerem análise"],
+ models:["Modelos","Saúde, desempenho e governança"]
+};
+const TYPE_DATA=[
+ {name:"TRANSFER",transactions:532909,frauds:4097,rate:.7688},
+ {name:"CASH_OUT",transactions:2237500,frauds:4116,rate:.1840},
+ {name:"CASH_IN",transactions:1399284,frauds:0,rate:0},
+ {name:"PAYMENT",transactions:2151495,frauds:0,rate:0},
+ {name:"DEBIT",transactions:41432,frauds:0,rate:0}
+];
+const AMOUNT_DATA=[
+ ["0–100",14105,18,.1276],["100–1K",128541,40,.0311],["1K–5K",559855,104,.0186],["5K–10K",583590,116,.0199],
+ ["10K–50K",1519856,760,.0500],["50K–100K",719351,669,.0930],["100K–500K",2497038,2642,.1058],["500K–1M",209658,1158,.5523],["1M–5M",119111,1962,1.6472],["5M+",11515,744,6.4611]
+];
+const ALERTS=[
+ {id:"AL-10482",orig:"C7162498",dest:"C945327594",type:"TRANSFER",date:"2024-03-01T03:00",amount:10000000,value:"R$ 10.000.000",score:96,status:"Pendente",analyst:"Ana Silva",sla:"Atrasado",old:"R$ 12.930.418,44",after:"R$ 2.930.418,44",rule:"TRANSFER de alto valor"},
+ {id:"AL-10483",orig:"C351297720",dest:"C766681183",type:"CASH_OUT",date:"2024-03-03T18:00",amount:10000000,value:"R$ 10.000.000",score:94,status:"Pendente",analyst:"Bruno Costa",sla:"Atrasado",old:"R$ 10.000.000,00",after:"R$ 0,00",rule:"CASH_OUT com saldo zerado"},
+ {id:"AL-10914",orig:"C416779475",dest:"C380259496",type:"TRANSFER",date:"2024-03-06T09:00",amount:10000000,value:"R$ 10.000.000",score:92,status:"Em análise",analyst:"Carla Mendes",sla:"Atrasado",old:"R$ 11.861.008,32",after:"R$ 1.861.008,32",rule:"TRANSFER de alto valor"},
+ {id:"AL-10915",orig:"C2050703310",dest:"C1622860679",type:"CASH_OUT",date:"2024-03-09T21:00",amount:10000000,value:"R$ 10.000.000",score:89,status:"Pendente",analyst:"Rafael Lima",sla:"Atrasado",old:"R$ 10.000.000,00",after:"R$ 0,00",rule:"CASH_OUT com saldo zerado"},
+ {id:"AL-11231",orig:"C1439740840",dest:"C875288652",type:"TRANSFER",date:"2024-03-13T15:00",amount:10000000,value:"R$ 10.000.000",score:88,status:"Pendente",analyst:"Mariana Souza",sla:"No prazo",old:"R$ 19.887.819,06",after:"R$ 9.887.819,06",rule:"TRANSFER de alto valor"},
+ {id:"AL-11881",orig:"C98213045",dest:"C221450912",type:"CASH_OUT",date:"2024-03-17T08:00",amount:2450000,value:"R$ 2.450.000",score:78,status:"Em análise",analyst:"Ana Silva",sla:"Atrasado",old:"R$ 2.450.000,00",after:"R$ 0,00",rule:"CASH_OUT com saldo zerado"},
+ {id:"AL-12011",orig:"C883011",dest:"C887221",type:"PAYMENT",date:"2024-03-20T19:00",amount:48200,value:"R$ 48.200",score:72,status:"Em análise",analyst:"João Pereira",sla:"No prazo",old:"R$ 72.130,00",after:"R$ 23.930,00",rule:"Velocidade transacional"},
+ {id:"AL-12344",orig:"C182271",dest:"C918821",type:"TRANSFER",date:"2024-03-24T11:00",amount:690000,value:"R$ 690.000",score:85,status:"Pendente",analyst:"Carla Mendes",sla:"No prazo",old:"R$ 710.000,00",after:"R$ 20.000,00",rule:"Novo favorecido + valor"},
+ {id:"AL-12671",orig:"C771244",dest:"C118822",type:"CASH_OUT",date:"2024-03-28T16:00",amount:1800000,value:"R$ 1.800.000",score:70,status:"Confirmado",analyst:"Lucas Ferreira",sla:"Atrasado",old:"R$ 1.800.000,00",after:"R$ 0,00",rule:"CASH_OUT com saldo zerado"},
+ {id:"AL-12990",orig:"C812288",dest:"C771291",type:"TRANSFER",date:"2024-03-31T18:00",amount:4980000,value:"R$ 4.980.000",score:87,status:"Pendente",analyst:"Bruno Costa",sla:"No prazo",old:"R$ 5.110.000,00",after:"R$ 130.000,00",rule:"Origem com redução extrema"}
+];
+
+let from="2024-03-01",to="2024-03-31",txMetric="volume",txTypeName="Todos os tipos";
+const charts={};
+const colors={ink:"#0b1f55",text:"#243d72",muted:"#7085ac",grid:"#e7edf5",yellow:"#f6b900",yellow2:"#ffe5a0",red:"#f25561",blue:"#3f82e5",green:"#1aaa70",violet:"#806ed7"};
+
+function brInt(n){return Math.round(n).toLocaleString("pt-BR")}
+function compact(n){if(n>=1e12)return "R$ "+(n/1e12).toFixed(2).replace(".",",")+"T";if(n>=1e9)return "R$ "+(n/1e9).toFixed(2).replace(".",",")+"B";if(n>=1e6)return (n/1e6).toFixed(2).replace(".",",")+"M";if(n>=1e3)return (n/1e3).toFixed(1).replace(".",",")+"K";return brInt(n)}
+function moneyCompact(n){if(n>=1e12)return "R$ "+(n/1e12).toFixed(2).replace(".",",")+"T";if(n>=1e9)return "R$ "+(n/1e9).toFixed(2).replace(".",",")+"B";if(n>=1e6)return "R$ "+(n/1e6).toFixed(1).replace(".",",")+"M";return "R$ "+brInt(n)}
+function dmy(s){const [y,m,d]=s.slice(0,10).split("-");return `${d}/${m}/${y}`}
+function shortDate(s){const [y,m,d]=s.slice(0,10).split("-");return `${d}/${m}`}
+function dateTime(s){const d=new Date(s);return d.toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"})}
+function sliceIndexes(){return RAW.dates.map((d,i)=>d>=from&&d<=to?i:-1).filter(i=>i>=0)}
+function sum(arr,idx){return idx.reduce((a,i)=>a+arr[i],0)}
+function updateKpis(){
+ const idx=sliceIndexes(),tx=sum(RAW.vol,idx),fr=sum(RAW.fraud,idx),ex=sum(RAW.exposure,idx),rate=tx?fr/tx*100:0,days=idx.length||1;
+ ovTx.textContent=compact(tx);ovFraud.textContent=brInt(fr);ovRate.textContent=rate.toFixed(4).replace(".",",")+"%";ovExposure.textContent=moneyCompact(ex);
+ txKpi.textContent=compact(tx);fraudKpi.textContent=brInt(fr);valueKpi.textContent=moneyCompact(TOTAL_PROCESSED*(tx/6362620));
+ periodLabel.textContent=`${dmy(from)} — ${dmy(to)}`;
+}
+
+function baseTooltip(){return {backgroundColor:"#10285c",borderWidth:0,textStyle:{color:"#fff",fontSize:11},padding:[9,11],extraCssText:"box-shadow:0 10px 28px rgba(15,38,83,.20);border-radius:9px"}}
+function axisStyle(){return {axisLine:{lineStyle:{color:"#d6dfec"}},axisTick:{show:false},axisLabel:{color:"#6e83aa",fontSize:11},splitLine:{lineStyle:{color:"#e9eef6"}}}}
+function chart(id){if(!charts[id])charts[id]=echarts.init(document.getElementById(id),null,{renderer:"canvas"});return charts[id]}
+
+function renderOverview(){
+ const idx=sliceIndexes(),ds=idx.map(i=>RAW.dates[i]),vols=idx.map(i=>RAW.vol[i]),rates=idx.map(i=>RAW.rate[i]),frauds=idx.map(i=>RAW.fraud[i]);
+ const c=chart("overviewChart");
+ c.setOption({
+  animationDuration:450,grid:{left:66,right:68,top:32,bottom:64},
+  tooltip:{...baseTooltip(),trigger:"axis",axisPointer:{type:"cross",crossStyle:{color:"#9babc3"}},formatter:p=>{const i=p[0].dataIndex;return `<b>${dmy(ds[i])}</b><br>Transações&nbsp;&nbsp;${brInt(vols[i])}<br>Fraudes&nbsp;&nbsp;${brInt(frauds[i])}<br>Taxa&nbsp;&nbsp;${rates[i].toFixed(4).replace(".",",")}%`}},
+  legend:{bottom:4,textStyle:{color:colors.muted,fontSize:11},itemWidth:13,itemHeight:8,data:["Transações","Taxa de fraude"]},
+  xAxis:{type:"category",data:ds,axisLine:{lineStyle:{color:"#d6dfec"}},axisTick:{show:false},axisLabel:{color:colors.muted,fontSize:11,formatter:v=>shortDate(v),hideOverlap:true}},
+  yAxis:[
+   {type:"value",name:"TRANSAÇÕES",nameTextStyle:{color:colors.text,fontSize:10,padding:[0,0,5,0]},...axisStyle(),axisLabel:{color:colors.muted,fontSize:11,formatter:v=>(v/1000).toFixed(0)+" mil"}},
+   {type:"value",name:"TAXA DE FRAUDE",nameTextStyle:{color:colors.text,fontSize:10,padding:[0,0,5,0]},min:0,max:v=>Math.max(.18,v.max*1.15),...axisStyle(),splitLine:{show:false},axisLabel:{color:colors.muted,fontSize:11,formatter:v=>v.toFixed(2).replace(".",",")+"%"}}
+  ],
+  dataZoom:[{type:"inside",filterMode:"filter"},{type:"slider",height:15,bottom:28,borderColor:"transparent",backgroundColor:"#f0f3f8",fillerColor:"rgba(63,130,229,.12)",handleStyle:{color:"#7d9fce"},moveHandleStyle:{color:"#a8bad3"},showDetail:false}],
+  series:[
+   {name:"Transações",type:"bar",data:vols,barMaxWidth:18,itemStyle:{color:"#ffe3a0",borderRadius:[4,4,0,0]},emphasis:{itemStyle:{color:"#f6c856"}}},
+   {name:"Taxa de fraude",type:"line",yAxisIndex:1,data:rates,smooth:.28,symbol:"circle",symbolSize:6,lineStyle:{width:2.6,color:colors.red},itemStyle:{color:colors.red,borderColor:"#fff",borderWidth:2},areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:"rgba(242,85,97,.16)"},{offset:1,color:"rgba(242,85,97,0)"}])},markPoint:{symbolSize:42,label:{fontSize:9,color:"#fff",formatter:"pico"},itemStyle:{color:colors.red},data:[{type:"max",name:"Pico"}]}}
+  ]
+ },true);
+ c.off("click");c.on("click",p=>{if(p.dataIndex==null)return;const selected=ds[p.dataIndex];from=selected;to=selected;dateFrom.value=selected;dateTo.value=selected;showPage("transactions");renderAll()})
+}
+
+function renderTypeRisk(){
+ const c=chart("typeRiskChart"),data=[...TYPE_DATA].sort((a,b)=>a.rate-b.rate);
+ c.setOption({
+  grid:{left:88,right:56,top:12,bottom:32},tooltip:{...baseTooltip(),trigger:"item",formatter:p=>{const d=data[p.dataIndex];return `<b>${d.name}</b><br>Taxa ${d.rate.toFixed(4).replace(".",",")}%<br>Fraudes ${brInt(d.frauds)}<br>Transações ${brInt(d.transactions)}`}},
+  xAxis:{type:"value",...axisStyle(),axisLabel:{color:colors.muted,fontSize:10,formatter:v=>v.toFixed(2).replace(".",",")+"%"}},
+  yAxis:{type:"category",data:data.map(d=>d.name),axisLine:{show:false},axisTick:{show:false},axisLabel:{color:colors.text,fontSize:11,fontWeight:650}},
+  series:[{type:"bar",data:data.map(d=>({value:d.rate,itemStyle:{color:d.rate>.5?colors.red:d.rate>0?"#f2a7aa":"#dfe6ef"}})),barWidth:17,itemStyle:{borderRadius:[0,6,6,0]},label:{show:true,position:"right",color:colors.text,fontSize:10,formatter:p=>p.value?Number(p.value).toFixed(4).replace(".",",")+"%":"0%"}}]
+ },true);
+ c.off("click");c.on("click",p=>{txTypeName=data[p.dataIndex].name;txType.value=txTypeName;showPage("transactions");renderTransactions()})
+}
+
+function renderTypeBubble(){
+ const c=chart("typeBubbleChart"),data=TYPE_DATA.map(d=>[d.transactions,d.rate,d.frauds,d.name]);
+ c.setOption({
+  grid:{left:62,right:24,top:22,bottom:48},tooltip:{...baseTooltip(),formatter:p=>`<b>${p.value[3]}</b><br>Transações ${brInt(p.value[0])}<br>Taxa ${Number(p.value[1]).toFixed(4).replace(".",",")}%<br>Fraudes ${brInt(p.value[2])}`},
+  xAxis:{type:"log",name:"VOLUME",nameLocation:"middle",nameGap:31,nameTextStyle:{color:colors.text,fontSize:10},...axisStyle(),axisLabel:{color:colors.muted,fontSize:10,formatter:v=>compact(v)}},
+  yAxis:{type:"value",name:"TAXA DE FRAUDE",nameTextStyle:{color:colors.text,fontSize:10},...axisStyle(),axisLabel:{color:colors.muted,fontSize:10,formatter:v=>v.toFixed(2).replace(".",",")+"%"}},
+  series:[{type:"scatter",data,symbolSize:v=>Math.max(12,Math.min(44,12+Math.sqrt(v[2])*0.45)),itemStyle:{color:p=>p.value[1]>.5?colors.red:colors.blue,opacity:.82},label:{show:true,position:"top",color:colors.text,fontSize:9.5,formatter:p=>p.value[3]}}]
+ },true)
+}
+
+function typeFactor(name){
+ const d=TYPE_DATA.find(x=>x.name===name);return d?d.transactions/6362620:1
+}
+function renderTransactions(){
+ const idx=sliceIndexes(),ds=idx.map(i=>RAW.dates[i]);let vals;
+ if(txMetric==="fraudes"){vals=idx.map(i=>{if(txTypeName==="TRANSFER")return Math.round(RAW.fraud[i]*.499);if(txTypeName==="CASH_OUT")return Math.round(RAW.fraud[i]*.501);if(txTypeName==="Todos os tipos")return RAW.fraud[i];return 0})}
+ else if(txMetric==="taxa"){vals=idx.map(i=>{if(txTypeName==="TRANSFER")return RAW.rate[i]*5.95;if(txTypeName==="CASH_OUT")return RAW.rate[i]*1.43;if(txTypeName==="Todos os tipos")return RAW.rate[i];return 0})}
+ else vals=idx.map(i=>Math.round(RAW.vol[i]*typeFactor(txTypeName)));
+ const color=txMetric==="fraudes"?colors.red:txMetric==="taxa"?colors.amber:colors.blue;
+ const c=chart("transactionChart");
+ c.setOption({
+  animationDuration:420,grid:{left:68,right:30,top:32,bottom:64},
+  tooltip:{...baseTooltip(),trigger:"axis",axisPointer:{type:"line",lineStyle:{color:"#a8b7cb"}},formatter:p=>{const i=p[0].dataIndex,v=vals[i];let val=txMetric==="taxa"?v.toFixed(4).replace(".",",")+"%":brInt(v);return `<b>${dmy(ds[i])}</b><br>${txTypeName}<br>${txMetric==="volume"?"Transações":txMetric==="fraudes"?"Fraudes":"Taxa"}&nbsp;&nbsp;${val}`}},
+  xAxis:{type:"category",data:ds,boundaryGap:txMetric==="volume",axisLine:{lineStyle:{color:"#d6dfec"}},axisTick:{show:false},axisLabel:{color:colors.muted,fontSize:11,formatter:v=>shortDate(v),hideOverlap:true}},
+  yAxis:{type:"value",name:txMetric==="volume"?"TRANSAÇÕES":txMetric==="fraudes"?"FRAUDES":"TAXA DE FRAUDE",nameTextStyle:{color:colors.text,fontSize:10},...axisStyle(),axisLabel:{color:colors.muted,fontSize:11,formatter:v=>txMetric==="taxa"?v.toFixed(2).replace(".",",")+"%":compact(v)}},
+  dataZoom:[{type:"inside"},{type:"slider",height:15,bottom:28,borderColor:"transparent",backgroundColor:"#f0f3f8",fillerColor:"rgba(63,130,229,.12)",showDetail:false}],
+  series:[txMetric==="volume"?{type:"bar",data:vals,barMaxWidth:21,itemStyle:{color:"#8bb4ec",borderRadius:[4,4,0,0]},emphasis:{itemStyle:{color:colors.blue}}}:{type:"line",data:vals,smooth:.3,symbol:"circle",symbolSize:6,lineStyle:{width:2.7,color},itemStyle:{color,borderColor:"#fff",borderWidth:2},areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:txMetric==="fraudes"?"rgba(242,85,97,.20)":"rgba(236,141,0,.18)"},{offset:1,color:"rgba(255,255,255,0)"}])}}]
+ },true)
+}
+
+function renderAmountRisk(){
+ const c=chart("amountRiskChart");
+ c.setOption({
+  grid:{left:48,right:20,top:16,bottom:64},tooltip:{...baseTooltip(),trigger:"axis",axisPointer:{type:"shadow"},formatter:p=>{const d=AMOUNT_DATA[p[0].dataIndex];return `<b>${d[0]}</b><br>Taxa ${d[3].toFixed(4).replace(".",",")}%<br>Fraudes ${brInt(d[2])}<br>Transações ${brInt(d[1])}`}},
+  xAxis:{type:"category",data:AMOUNT_DATA.map(d=>d[0]),axisLine:{lineStyle:{color:"#d6dfec"}},axisTick:{show:false},axisLabel:{color:colors.muted,fontSize:9.5,rotate:28,interval:0}},
+  yAxis:{type:"log",name:"TAXA DE FRAUDE",nameTextStyle:{color:colors.text,fontSize:10},...axisStyle(),axisLabel:{color:colors.muted,fontSize:10,formatter:v=>v+"%"}},
+  series:[{type:"bar",data:AMOUNT_DATA.map(d=>({value:d[3],itemStyle:{color:d[3]>=1?colors.red:d[3]>=.5?"#f58d94":"#f3bdbe"}})),barMaxWidth:24,itemStyle:{borderRadius:[5,5,0,0]}}]
+ },true)
+}
+
+const quality=[99.72,99.76,99.81,99.79,99.83,99.86,99.82,99.88,99.84,99.85,99.89,99.91,99.88,99.90,99.92,99.89,99.93,99.91,99.90,99.94,99.91,99.92,99.93,99.94,99.92,99.95,99.94,99.96,99.95,99.94,99.8];
+const drift=[.061,.058,.056,.059,.052,.050,.051,.048,.047,.045,.043,.044,.041,.040,.039,.042,.038,.037,.039,.036,.035,.034,.033,.032,.034,.031,.030,.029,.031,.032,.035];
+function renderModelHealth(){
+ const c=chart("modelHealthChart");
+ c.setOption({
+  grid:{left:58,right:58,top:25,bottom:42},tooltip:{...baseTooltip(),trigger:"axis",formatter:p=>`<b>${dmy(RAW.dates[p[0].dataIndex])}</b><br>Qualidade ${quality[p[0].dataIndex].toFixed(2).replace(".",",")}%<br>PSI ${drift[p[0].dataIndex].toFixed(3).replace(".",",")}`},
+  legend:{bottom:3,textStyle:{color:colors.muted,fontSize:10},data:["Qualidade dos dados","PSI de desvio"]},
+  xAxis:{type:"category",data:RAW.dates,axisLine:{lineStyle:{color:"#d6dfec"}},axisTick:{show:false},axisLabel:{color:colors.muted,fontSize:9.5,formatter:v=>shortDate(v),hideOverlap:true}},
+  yAxis:[{type:"value",min:99.5,max:100,...axisStyle(),axisLabel:{color:colors.muted,fontSize:9.5,formatter:v=>v.toFixed(1)+"%"}},{type:"value",min:0,max:.1,...axisStyle(),splitLine:{show:false},axisLabel:{color:colors.muted,fontSize:9.5,formatter:v=>v.toFixed(2)}}],
+  series:[
+   {name:"Qualidade dos dados",type:"line",data:quality,smooth:.3,symbol:"none",lineStyle:{color:colors.green,width:2.5},areaStyle:{color:"rgba(26,170,112,.08)"}},
+   {name:"PSI de desvio",type:"line",yAxisIndex:1,data:drift,smooth:.3,symbol:"none",lineStyle:{color:colors.violet,width:2,opacity:.85}}
+  ]
+ },true)
+}
+
+function renderTechnical(){
+ const comp=chart("modelCompareChart"),gain=chart("modelGainChart");
+ const models=["Regressão Logística","Árvore de Decisão","Floresta Aleatória","Árvores Impulsionadas"],base=[.82,95.28,94.99,95.27],feat=[16.37,99.94,99.94,99.94];
+ comp.setOption({
+  grid:{left:145,right:28,top:30,bottom:48},tooltip:{...baseTooltip(),trigger:"axis",axisPointer:{type:"shadow"}},legend:{top:0,textStyle:{fontSize:10,color:colors.muted}},
+  xAxis:{type:"value",max:100,...axisStyle(),axisLabel:{color:colors.muted,fontSize:10,formatter:v=>v+"%"}},yAxis:{type:"category",data:models,axisLine:{show:false},axisTick:{show:false},axisLabel:{color:colors.text,fontSize:10}},
+  series:[{name:"Referência",type:"bar",data:base,barWidth:10,itemStyle:{color:"#b8c9df",borderRadius:5}},{name:"Com variáveis",type:"bar",data:feat,barWidth:10,itemStyle:{color:colors.blue,borderRadius:5}}]
+ },true);
+ gain.setOption({
+  grid:{left:105,right:26,top:30,bottom:48},tooltip:{...baseTooltip(),trigger:"axis",axisPointer:{type:"shadow"}},xAxis:{type:"value",...axisStyle(),axisLabel:{color:colors.muted,fontSize:10,formatter:v=>"R$ "+v+"M"}},yAxis:{type:"category",data:["Logística","Árvore","Floresta","Impulsionadas"],axisLine:{show:false},axisTick:{show:false},axisLabel:{color:colors.text,fontSize:10}},
+  series:[{type:"bar",data:[357.5,66.4,73.2,66.7],barWidth:16,itemStyle:{color:p=>p.dataIndex===2?colors.green:colors.blue,borderRadius:[0,6,6,0]},label:{show:true,position:"right",fontSize:10,color:colors.text,formatter:p=>"R$ "+String(p.value).replace(".",",")+"M"}}]
+ },true)
+}
+
+function renderAlerts(){
+ const q=fSearch.value.toLowerCase(),tp=fType.value,min=Number(fValue.value||0),st=fStatus.value,sla=fSla.value;
+ const rows=ALERTS.filter(a=>a.date.slice(0,10)>=from&&a.date.slice(0,10)<=to&&(!tp||a.type===tp)&&a.amount>=min&&(!st||a.status===st)&&(!sla||a.sla===sla)&&Object.values(a).join(" ").toLowerCase().includes(q));
+ alertsBody.innerHTML="";alertCount.textContent=`${rows.length} alertas exibidos`;
+ rows.forEach((a,i)=>{
+  const tr=document.createElement("tr");if(i===0)tr.classList.add("selected");
+  tr.innerHTML=`<td>${a.orig}</td><td>${a.dest}</td><td>${a.type}</td><td>${dateTime(a.date)}</td><td>${a.value}</td><td><span class="score">${a.score}</span></td><td><span class="badge ${a.status==="Confirmado"?"ok":a.status==="Em análise"?"review":"pending"}">${a.status}</span></td><td>${a.analyst}</td><td><span class="badge ${a.sla==="Atrasado"?"late":"ok"}">${a.sla}</span></td>`;
+  tr.onclick=()=>{alertsBody.querySelectorAll("tr").forEach(x=>x.classList.remove("selected"));tr.classList.add("selected");fillDetail(a)};alertsBody.appendChild(tr)
+ });
+ if(rows[0])fillDetail(rows[0]);else{dId.textContent="Nenhum alerta";dRoute.innerHTML="Nenhum alerta no filtro atual";dAmount.textContent="—"}
+}
+function fillDetail(a){
+ dId.textContent=a.id;dSla.textContent=a.sla;dSla.className="badge "+(a.sla==="Atrasado"?"late":"ok");dRoute.innerHTML=`${a.orig} → ${a.dest}<small>${a.type} · ${dateTime(a.date)}</small>`;dAmount.textContent=a.value;dOld.textContent=a.old;dNew.textContent=a.after;dRule.textContent=a.rule;dScore.textContent=a.score+" / 100";dStatus.textContent=a.status;dAnalyst.textContent=a.analyst
+}
+
+function showPage(id){
+ document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active",p.id===id));document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===id));pageTitle.textContent=META[id][0];pageSub.textContent=META[id][1];history.replaceState(null,"","#"+id);
+ requestAnimationFrame(()=>Object.values(charts).forEach(c=>c.resize()))
+}
+document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>showPage(b.dataset.page));document.querySelectorAll("[data-jump]").forEach(b=>b.onclick=()=>showPage(b.dataset.jump));
+
+function renderAll(){updateKpis();renderOverview();renderTypeRisk();renderTypeBubble();renderTransactions();renderAmountRisk();renderAlerts();renderModelHealth();requestAnimationFrame(()=>Object.values(charts).forEach(c=>c.resize()))}
+periodBtn.onclick=e=>{e.stopPropagation();datePop.classList.toggle("open")};datePop.onclick=e=>e.stopPropagation();document.addEventListener("click",()=>datePop.classList.remove("open"));
+dateApply.onclick=()=>{if(dateFrom.value>dateTo.value)return;from=dateFrom.value;to=dateTo.value;datePop.classList.remove("open");renderAll()};
+dateReset.onclick=()=>{from="2024-03-01";to="2024-03-31";dateFrom.value=from;dateTo.value=to;datePop.classList.remove("open");renderAll()};
+document.querySelectorAll("#txMetric button").forEach(b=>b.onclick=()=>{document.querySelectorAll("#txMetric button").forEach(x=>x.classList.remove("active"));b.classList.add("active");txMetric=b.dataset.metric;renderTransactions()});
+txType.onchange=()=>{txTypeName=txType.value;renderTransactions();document.querySelectorAll("#txTypeRows tr").forEach(r=>r.classList.toggle("selected",r.dataset.type===txTypeName))};
+document.querySelectorAll("#txTypeRows tr").forEach(r=>r.onclick=()=>{txTypeName=r.dataset.type;txType.value=txTypeName;document.querySelectorAll("#txTypeRows tr").forEach(x=>x.classList.toggle("selected",x===r));renderTransactions()});
+[fType,fValue,fStatus,fSla].forEach(x=>x.onchange=renderAlerts);fSearch.oninput=renderAlerts;
+openTech.onclick=()=>{techModal.classList.add("open");setTimeout(()=>{renderTechnical();charts.modelCompareChart.resize();charts.modelGainChart.resize()},40)};closeTech.onclick=()=>techModal.classList.remove("open");techModal.onclick=e=>{if(e.target===techModal)techModal.classList.remove("open")};
+
+window.addEventListener("resize",()=>Object.values(charts).forEach(c=>c.resize()));
+window.addEventListener("load",()=>{
+ if(!window.echarts){document.querySelectorAll(".chart").forEach(el=>el.innerHTML='<div class="loading">Não foi possível carregar a biblioteca de gráficos.</div>');return}
+ renderAll();const h=location.hash.slice(1);if(META[h])showPage(h)
+});
+</script>
+</body>
+</html>
