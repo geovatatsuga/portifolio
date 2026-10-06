@@ -186,8 +186,14 @@ export const EDUCATION = [
   {
     institution: "Universidade Estadual da Paraíba (UEPB)",
     degree: { en: "Technologist in Data Science", pt: "Tecnólogo em Ciência de Dados" },
-    period: { en: "Conclusion 06/2026", pt: "Conclusão 06/2026" },
+    period: { en: "Expected completion 2027.1", pt: "Conclusão prevista 2027.1" },
     details: { en: "Academic track focused on data, engineering, artificial intelligence and business impact.", pt: "Formação com foco em dados, engenharia, inteligência artificial e impacto de negócio." }
+  },
+  {
+    institution: "Universidade Federal da Paraíba (UFPB)",
+    degree: { en: "Undergraduate studies · Paused", pt: "Graduação · Trancada" },
+    period: { en: "Paused to take on a scholarship at UFPB", pt: "Pausada para assumir uma bolsa na UFPB" },
+    details: { en: "", pt: "" }
   }
 ];
 
